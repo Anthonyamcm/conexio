@@ -1,6 +1,6 @@
 import { spacing } from '@/src/utlis';
-import React, { ComponentType, useMemo } from 'react';
-import { StyleProp, ViewProps, ViewStyle, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { StyleProp, ViewProps, ViewStyle, View as RNView } from 'react-native';
 
 type Presets = keyof typeof viewPresets;
 
@@ -10,7 +10,7 @@ export interface Props extends ViewProps {
   children?: React.ReactNode;
 }
 
-export function ViewContainer({
+export function View({
   style: viewStyleOverride,
   children,
   preset,
@@ -24,24 +24,25 @@ export function ViewContainer({
   );
 
   return (
-    <View style={memoizedViewStyle} {...rest}>
+    <RNView style={memoizedViewStyle} {...rest}>
       {children}
-    </View>
+    </RNView>
   );
 }
 
 const baseStyle: ViewStyle = {
-  paddingVertical: spacing.lg,
-  paddingHorizontal: spacing.lg,
   overflow: 'hidden',
 };
 
 const rowStyle: ViewStyle = {
   flexDirection: 'row',
+  gap: 15,
 };
 
 const columnStyle: ViewStyle = {
   flexDirection: 'column',
+  gap: 15,
+  paddingBottom: spacing.xl,
 };
 
 const viewPresets = {

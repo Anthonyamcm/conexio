@@ -1,22 +1,40 @@
-import { Button, Screen, ViewContainer } from '@/src/components/atoms';
-import { colors } from '@/src/utlis';
+import { Button, Screen, View } from '@/src/components/atoms';
+import { colors, spacing } from '@/src/utlis';
+import { router } from 'expo-router';
+
+//TODO Finish design
 
 export default function Landing() {
+  const registerPressed = () => {
+    router.push('/register');
+  };
+
+  const loginPressed = () => {
+    router.push('/login');
+  };
+
   return (
     <Screen
       preset="fixed"
       safeAreaEdges={['top', 'bottom']}
-      contentContainerStyle={{ justifyContent: 'center', flex: 1 }}
+      contentContainerStyle={{
+        justifyContent: 'center',
+        flex: 1,
+        padding: spacing.lg,
+      }}
     >
-      <ViewContainer preset={'column'} style={{ gap: 15 }}>
-        <Button preset={'default'}>{'Sign In'}</Button>
+      <View preset={'column'}>
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={loginPressed}
         >
-          {'Register'}
+          {'Log in'}
         </Button>
-      </ViewContainer>
+        <Button preset={'default'} onPress={registerPressed}>
+          {'Create account'}
+        </Button>
+      </View>
     </Screen>
   );
 }
