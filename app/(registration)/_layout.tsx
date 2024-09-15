@@ -19,7 +19,6 @@ export default function Layout() {
           <Stack.Screen name="name" />
           <Stack.Screen name="username" />
         </Stack>
-        <Stepper />
       </Screen>
     </RegistrationProvider>
   );
