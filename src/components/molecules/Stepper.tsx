@@ -19,7 +19,7 @@ export default function Stepper() {
       }}
     >
       <TouchableOpacity onPress={prevStep}>
-        <Entypo name="chevron-left" size={24} color="black" />
+        <Entypo name="chevron-left" size={32} color="black" />
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', gap: 15 }}>
         {steps.map((step, index) => (

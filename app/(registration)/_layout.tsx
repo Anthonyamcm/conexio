@@ -17,8 +17,9 @@ export default function Layout() {
         <Stepper />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="name" />
-          <Stack.Screen name="handle" />
+          <Stack.Screen name="username" />
         </Stack>
+        <Stepper />
       </Screen>
     </RegistrationProvider>
   );

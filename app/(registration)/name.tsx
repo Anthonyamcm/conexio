@@ -3,6 +3,7 @@ import { colors, spacing } from '@/src/utlis';
 import { Header } from '@/src/components/molecules';
 import { router } from 'expo-router';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 //TODO: Fix inline styles and convert to styleSheet
 
@@ -10,7 +11,7 @@ export default function Name() {
   const { nextStep } = useRegistration();
   const continuePressed = () => {
     nextStep();
-    router.push('/(registration)/handle');
+    router.push('/(registration)/username');
   };
 
   return (
@@ -20,13 +21,22 @@ export default function Name() {
     >
       <Header
         title={'What is your name?'}
-        subtitle={'Please provide your first and last name'}
+        subtitle={
+          'Enter the name on which you wish to be known as, this will be your display name'
+        }
       />
       <View preset={'column'}>
-        <View preset={'row'}>
-          <Input placeholder={'First name'} containerStyle={{ flex: 1 }} />
-          <Input placeholder={'Last name'} containerStyle={{ flex: 1 }} />
-        </View>
+        <Input
+          placeholder={'Name'}
+          LeftAccessory={() => (
+            <Ionicons
+              name="person"
+              size={26}
+              color={colors.palette.neutral800}
+              style={{ alignSelf: 'center', marginStart: 6 }}
+            />
+          )}
+        />
       </View>
       <Button
         preset={'gradient'}

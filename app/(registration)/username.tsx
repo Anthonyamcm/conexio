@@ -3,7 +3,7 @@ import { Header } from '@/src/components/molecules';
 import { colors, spacing } from '@/src/utlis';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export default function Handle() {
+export default function Username() {
   return (
     <Screen
       preset="auto"
@@ -11,7 +11,9 @@ export default function Handle() {
     >
       <Header
         title={'What will your username be?'}
-        subtitle={'Choose a username so people can find you easier!'}
+        subtitle={
+          'Choose a unique username to be associated with your account '
+        }
       />
       <View preset={'column'}>
         <Input
