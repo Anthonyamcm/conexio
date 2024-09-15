@@ -38,7 +38,7 @@ export default function Login() {
           )}
           secureTextEntry={true}
         />
-        <Link href={'/landing'}>
+        <Link href={'/home'}>
           <Text
             size={'md'}
             style={{ color: colors.palette.neutral800 }}

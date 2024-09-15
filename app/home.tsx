@@ -4,9 +4,9 @@ import { router } from 'expo-router';
 
 //TODO Finish design
 
-export default function Landing() {
+export default function Home() {
   const registerPressed = () => {
-    router.push('/register');
+    router.push('/(registration)/name');
   };
 
   const loginPressed = () => {
