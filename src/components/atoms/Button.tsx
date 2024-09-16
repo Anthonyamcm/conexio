@@ -133,11 +133,9 @@ const baseViewStyle: ViewStyle = {
 };
 
 const baseTextStyle: TextStyle = {
-  fontSize: 24,
+  fontSize: 18,
   fontFamily: typography.primary.medium,
   textAlign: 'center',
-  flexShrink: 1,
-  flexGrow: 0,
   zIndex: 2,
 };
 
@@ -156,7 +154,11 @@ const viewPresets = {
   ] as StyleProp<TextStyle>,
   reversed: [
     baseViewStyle,
-    { backgroundColor: colors.transparent },
+    {
+      backgroundColor: colors.transparent,
+      borderWidth: 2,
+      borderColor: colors.palette.neutral300,
+    },
   ] as StyleProp<TextStyle>,
   gradient: [baseViewStyle] as StyleProp<TextStyle>,
 };

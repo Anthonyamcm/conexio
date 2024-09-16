@@ -41,7 +41,7 @@ const rowStyle: ViewStyle = {
 
 const columnStyle: ViewStyle = {
   flexDirection: 'column',
-  gap: 15,
+  gap: 10,
   paddingBottom: spacing.xl,
 };
 

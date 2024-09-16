@@ -1,46 +1,43 @@
 import { Button, Footer, Input, Screen, View } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
-import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-export default function Username() {
-  const { nextStep } = useRegistration();
-  const continuePressed = () => {
-    nextStep();
-    router.push('/(registration)/otp');
-  };
+export default function Otp() {
   return (
     <Screen
       preset="auto"
       contentContainerStyle={{ flex: 1, padding: spacing.lg }}
     >
       <Header
-        title={'What will your username be?'}
+        title={`What's your mobile number?`}
         subtitle={
-          'Choose a unique username to be associated with your account '
+          'Enter the mobile number on which you can be contacted. No one will see this on your profile'
         }
       />
       <View preset={'column'} style={{ flex: 1 }}>
         <Input
-          placeholder={'Username'}
+          placeholder={'Mobile number'}
           LeftAccessory={() => (
-            <MaterialIcons
-              name="alternate-email"
+            <FontAwesome
+              name="phone"
               size={26}
               color={colors.palette.neutral800}
               style={{ alignSelf: 'center', marginLeft: 6 }}
             />
           )}
+          keyboardType="number-pad"
         />
-        <Button
-          preset={'gradient'}
-          gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={continuePressed}
-        >
-          {'Continue'}
-        </Button>
+        <View preset="column">
+          <Button
+            preset={'gradient'}
+            gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          >
+            {'Continue'}
+          </Button>
+          <Button preset="reversed">{'Sign up with email adress'}</Button>
+        </View>
       </View>
       <Footer />
     </Screen>

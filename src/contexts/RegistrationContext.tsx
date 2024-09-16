@@ -26,6 +26,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   const steps: string[] = [
     'Name',
     'UserName',
+    'DOB',
     'Mobile/Email',
     'OTP',
     'Password',

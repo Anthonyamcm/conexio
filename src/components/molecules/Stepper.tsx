@@ -23,7 +23,7 @@ export default function Stepper() {
       </TouchableOpacity>
       <View style={{ flexDirection: 'row', gap: 15 }}>
         {steps.map((step, index) => (
-          <Step index={index} />
+          <Step key={step} index={index} />
         ))}
       </View>
     </View>

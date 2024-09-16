@@ -10,7 +10,9 @@ interface HeaderProps {
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
     <View preset={'column'}>
-      <Text preset={'subheading'}>{title}</Text>
+      <Text preset={'subheading'} weight="medium">
+        {title}
+      </Text>
       <Text>{subtitle}</Text>
     </View>
   );

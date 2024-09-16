@@ -38,7 +38,7 @@ export interface InputProps extends Omit<TextInputProps, 'ref'> {
   LeftAccessory?: ComponentType<InputAccessoryProps>;
 }
 
-export const Input = forwardRef(function TextField(
+const Input = forwardRef(function TextField(
   {
     label,
     placeholder,
@@ -119,7 +119,7 @@ export const Input = forwardRef(function TextField(
   return (
     <TouchableOpacity
       activeOpacity={1}
-      style={containerStyles}
+      style={[containerStyles, { paddingVertical: 5 }]}
       onPress={focusInput}
       accessibilityState={{ disabled }}
     >
@@ -220,3 +220,5 @@ const leftAccessoryStyle: ViewStyle = {
   alignItems: 'center',
   alignSelf: 'center',
 };
+
+export default Input;
