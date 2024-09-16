@@ -8,12 +8,6 @@ import {
 import { Input } from '../atoms';
 import { useEffect, useRef, useState } from 'react';
 
-type InputChangeHandler = (
-  text: string,
-  nextRef: React.RefObject<TextInput> | undefined,
-  prevRef: React.RefObject<TextInput> | undefined,
-) => void;
-
 export default function OneTimePasscode() {
   // Refs for each input field
   const inputRefs = Array.from({ length: 6 }, () =>

@@ -19,6 +19,8 @@ export default function Layout() {
           <Stack.Screen name="username" />
           <Stack.Screen name="dob" />
           <Stack.Screen name="mobile" />
+          <Stack.Screen name="otp" />
+          <Stack.Screen name="password" />
         </Stack>
       </Screen>
     </RegistrationProvider>

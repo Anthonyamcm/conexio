@@ -8,7 +8,7 @@ export default function Dob() {
   const { nextStep } = useRegistration();
   const continuePressed = () => {
     nextStep();
-    router.push('/(registration)/mobile');
+    router.push('/(registration)/password');
   };
 
   return (

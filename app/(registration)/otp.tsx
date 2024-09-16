@@ -1,8 +1,16 @@
 import { Button, Footer, Screen, View } from '@/src/components/atoms';
 import { Header, OneTimePasscode } from '@/src/components/molecules';
+import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
+import { router } from 'expo-router';
 
 export default function Otp() {
+  const { nextStep } = useRegistration();
+  const continuePressed = () => {
+    nextStep();
+    router.push('/(registration)/name');
+  };
+
   return (
     <Screen
       preset="auto"
@@ -20,6 +28,7 @@ export default function Otp() {
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={continuePressed}
         >
           {'Continue'}
         </Button>
