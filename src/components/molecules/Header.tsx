@@ -1,6 +1,4 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import { Text, View } from '../atoms';
-import { colors, spacing } from '@/src/utlis';
 
 interface HeaderProps {
   title: string;
@@ -9,7 +7,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <View preset={'column'}>
+    <View preset={'column'} style={{ paddingBottom: 10 }}>
       <Text preset={'subheading'} weight="medium">
         {title}
       </Text>

@@ -1,15 +1,14 @@
-import { Button, Footer, Input, Screen, View } from '@/src/components/atoms';
+import { Button, Footer, Screen, View } from '@/src/components/atoms';
 import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function Dob() {
   const { nextStep } = useRegistration();
   const continuePressed = () => {
     nextStep();
-    router.push('/(registration)/otp');
+    router.push('/(registration)/mobile');
   };
 
   return (
