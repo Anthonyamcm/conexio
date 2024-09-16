@@ -10,7 +10,7 @@ interface StepProps {
 export default function Step({ index }: StepProps) {
   const { currentStep } = useRegistration(); // Get currentStep from context
 
-  let isCompleted = index <= currentStep;
+  let isCompleted: boolean = index <= currentStep;
 
   const stepStyle: ViewStyle = {
     maxHeight: 25,

@@ -35,7 +35,7 @@ export default function Name() {
             <Ionicons
               name="person"
               size={26}
-              color={colors.palette.neutral800}
+              color={colors.palette.neutral400}
               style={{ alignSelf: 'center', marginStart: 6 }}
             />
           )}

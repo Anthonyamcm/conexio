@@ -23,7 +23,7 @@ export default function Otp() {
             <FontAwesome
               name="phone"
               size={26}
-              color={colors.palette.neutral800}
+              color={colors.palette.neutral400}
               style={{ alignSelf: 'center', marginLeft: 6 }}
             />
           )}

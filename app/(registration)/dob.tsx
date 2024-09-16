@@ -1,39 +1,31 @@
 import { Button, Footer, Input, Screen, View } from '@/src/components/atoms';
-import { Header } from '@/src/components/molecules';
+import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
-export default function Username() {
+export default function Dob() {
   const { nextStep } = useRegistration();
   const continuePressed = () => {
     nextStep();
-    router.push('/(registration)/dob');
+    router.push('/(registration)/otp');
   };
+
   return (
     <Screen
       preset="auto"
-      contentContainerStyle={{ flex: 1, padding: spacing.lg }}
+      contentContainerStyle={{
+        flex: 1,
+        padding: spacing.lg,
+      }}
     >
       <Header
-        title={'What will your username be?'}
-        subtitle={
-          'Choose a unique username to be associated with your account '
-        }
+        title={`What's your date of birth?`}
+        subtitle={`Enter your date of birth (you must be 16+). This won't appear on your profile.`}
       />
       <View preset={'column'} style={{ flex: 1 }}>
-        <Input
-          placeholder={'Username'}
-          LeftAccessory={() => (
-            <MaterialIcons
-              name="alternate-email"
-              size={26}
-              color={colors.palette.neutral400}
-              style={{ alignSelf: 'center', marginLeft: 6 }}
-            />
-          )}
-        />
+        {/* <DateOfBirthInput /> */}
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}

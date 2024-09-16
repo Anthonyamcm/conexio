@@ -17,6 +17,7 @@ export default function Layout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="name" />
           <Stack.Screen name="username" />
+          <Stack.Screen name="dob" />
           <Stack.Screen name="otp" />
         </Stack>
       </Screen>
