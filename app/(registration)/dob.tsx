@@ -25,7 +25,7 @@ export default function Dob() {
         subtitle={`Enter your date of birth (you must be 16+). This won't appear on your profile.`}
       />
       <View preset={'column'} style={{ flex: 1 }}>
-        {/* <DateOfBirthInput /> */}
+        <DateOfBirthInput />
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
