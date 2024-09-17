@@ -76,7 +76,11 @@ export default function Name() {
                       ? colors.palette.error100
                       : colors.palette.neutral400
                   }
-                  style={{ alignSelf: 'center', marginStart: 6 }}
+                  style={{
+                    alignSelf: 'center',
+                    marginStart: 6,
+                    opacity: errors.name && touched.name ? 0.8 : 1,
+                  }}
                 />
               )}
               value={values.name}
