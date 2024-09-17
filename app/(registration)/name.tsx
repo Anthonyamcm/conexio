@@ -17,7 +17,7 @@ import { TextInput } from 'react-native-gesture-handler';
 //TODO: Fix inline styles and convert to styleSheet
 
 const nameSchema = yup.object().shape({
-  name: yup.string().required('Name is required').min(4).max(63),
+  name: yup.string().required('Name is required').min(3).max(32),
 });
 
 export default function Name() {

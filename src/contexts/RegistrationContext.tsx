@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import * as yup from 'yup';
 import { validateSchemaPartially } from '../lib/helpers';
-import { Href, router } from 'expo-router';
+import { router } from 'expo-router';
 
 // Define the shape of the form data
 interface FormData {
