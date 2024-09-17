@@ -90,7 +90,6 @@ interface RegistrationContextProps {
   handleSubmitStep: (
     validationSchema: yup.ObjectSchema<any>,
     fieldsToValidate: string[],
-    nextScreen: Href<string | object>,
   ) => Promise<void>;
   nextStep: () => void;
   prevStep: () => void;
@@ -140,6 +139,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
         state.formData,
         fieldsToValidate,
       );
+      console.log(state.formData);
       if (Object.keys(errors).length === 0) {
         setErrors({});
         return true;
@@ -155,12 +155,11 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   const handleSubmitStep = async (
     validationSchema: yup.ObjectSchema<any>,
     fieldsToValidate: string[],
-    nextScreen: Href<string | object>,
   ): Promise<void> => {
     const isValid = await validateStep(validationSchema, fieldsToValidate);
     if (isValid) {
+      goToNextScreen();
       nextStep();
-      router.push(nextScreen);
     }
   };
 
@@ -173,6 +172,30 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   const prevStep = () => {
     dispatch({ type: 'PREV_STEP' });
     router.back();
+  };
+
+  const goToNextScreen = (): void => {
+    console.log(state.currentStep);
+    switch (state.currentStep) {
+      case 0:
+        router.push('/(registration)/username');
+        break;
+      case 1:
+        router.push('/(registration)/dob');
+        break;
+      case 2:
+        router.push('/(registration)/mobile');
+        break;
+      case 3:
+        router.push('/(registration)/otp');
+        break;
+      case 4:
+        router.push('/(registration)/password');
+        break;
+      default:
+        router.push('/(registration)/name');
+        break;
+    }
   };
 
   return (

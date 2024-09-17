@@ -6,7 +6,7 @@ import { router } from 'expo-router';
 
 export default function Home() {
   const registerPressed = () => {
-    router.push('/(registration)/mobile');
+    router.push('/(registration)/name');
   };
 
   const loginPressed = () => {

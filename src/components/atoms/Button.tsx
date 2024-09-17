@@ -80,7 +80,7 @@ export function Button({
         <LeftAccessory style={leftAccessoryStyle} pressableState={state} />
       )}
       {isLoading ? (
-        <ActivityIndicator size="large" color={colors.palette.neutral100} />
+        <ActivityIndicator size="small" color={colors.palette.neutral100} />
       ) : (
         <Text style={memoizedTextStyle(state)}>{children}</Text>
       )}
@@ -156,7 +156,7 @@ const viewPresets = {
     baseViewStyle,
     {
       backgroundColor: colors.transparent,
-      borderWidth: 2,
+      borderWidth: 3,
       borderColor: colors.palette.neutral300,
     },
   ] as StyleProp<TextStyle>,
@@ -166,7 +166,7 @@ const viewPresets = {
 const textPresets: Record<Presets, StyleProp<TextStyle>> = {
   default: [baseTextStyle, { color: colors.palette.neutral600 }],
   filled: [baseTextStyle, { color: colors.palette.neutral300 }],
-  reversed: [baseTextStyle, { color: colors.palette.neutral600 }],
+  reversed: [baseTextStyle, { color: colors.palette.neutral500 }],
   gradient: [baseTextStyle, { color: colors.palette.neutral100 }],
 };
 
