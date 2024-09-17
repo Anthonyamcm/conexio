@@ -1,8 +1,8 @@
 export interface IRegistrationData {
-  firstName: string;
-  lastName: string;
-  userName: string;
-  email?: string;
+  name: string;
+  username: string;
+  dob: Date;
   mobile?: string;
+  email?: string;
   password: string;
 }

@@ -1,62 +1,200 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { IRegistrationData } from '../config';
-import { router } from 'expo-router';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  ReactNode,
+} from 'react';
+import * as yup from 'yup';
+import { validateSchemaPartially } from '../lib/helpers';
+import { Href, router } from 'expo-router';
 
-interface RegistrationContextProps {
+// Define the shape of the form data
+interface FormData {
+  name: string;
+  dob: Date;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  username: string;
+}
+
+// Define the initial state and shape of the state
+interface RegistrationState {
   currentStep: number;
+  formData: FormData;
+  errors: { [key: string]: string };
+}
+
+const initialState: RegistrationState = {
+  currentStep: 0,
+  formData: {
+    name: '',
+    dob: new Date(),
+    email: '',
+    password: '',
+    confirmPassword: '',
+    username: '',
+  },
+  errors: {},
+};
+
+// Define action types
+type RegistrationAction =
+  | { type: 'SET_FORM_DATA'; payload: Partial<FormData> }
+  | { type: 'SET_ERRORS'; payload: { [key: string]: string } }
+  | { type: 'NEXT_STEP' }
+  | { type: 'PREV_STEP' };
+
+// Reducer function
+const registrationReducer = (
+  state: RegistrationState,
+  action: RegistrationAction,
+): RegistrationState => {
+  switch (action.type) {
+    case 'SET_FORM_DATA':
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          ...action.payload,
+        },
+      };
+    case 'SET_ERRORS':
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          ...action.payload,
+        },
+      };
+    case 'NEXT_STEP':
+      return { ...state, currentStep: state.currentStep + 1 };
+    case 'PREV_STEP':
+      return { ...state, currentStep: state.currentStep - 1 };
+    default:
+      return state;
+  }
+};
+
+// Define the context value type
+interface RegistrationContextProps {
+  state: RegistrationState;
+  steps: string[];
+  setFormData: (newData: Partial<FormData>) => void;
+  setErrors: (newErrors: { [key: string]: string }) => void;
+  validateStep: (
+    validationSchema: yup.ObjectSchema<any>,
+    fieldsToValidate: string[],
+  ) => Promise<boolean>;
+  handleSubmitStep: (
+    validationSchema: yup.ObjectSchema<any>,
+    fieldsToValidate: string[],
+    nextScreen: Href<string | object>,
+  ) => Promise<void>;
   nextStep: () => void;
   prevStep: () => void;
-  steps: string[];
-  user: IRegistrationData | null;
 }
 
 interface RegistrationProviderProps {
-  children: ReactNode; // This allows any valid React elements to be passed as children
+  children: ReactNode;
 }
 
+// Create context
 const RegistrationContext = createContext<RegistrationContextProps | undefined>(
   undefined,
 );
 
+// RegistrationProvider component
 export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   children,
 }) => {
-  const [user, setUser] = useState<IRegistrationData | null>(null);
-  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [state, dispatch] = useReducer(registrationReducer, initialState);
   const steps: string[] = [
-    'Name',
-    'UserName',
-    'DOB',
-    'Mobile/Email',
-    'OTP',
-    'Password',
+    'name',
+    'username',
+    'dob',
+    'mobile',
+    'otp',
+    'password',
   ];
 
-  const nextStep = () => {
-    if (currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
+  // Function to update form data
+  const setFormData = (newData: Partial<FormData>) => {
+    dispatch({ type: 'SET_FORM_DATA', payload: newData });
+  };
+
+  // Function to update errors
+  const setErrors = (newErrors: { [key: string]: string }) => {
+    dispatch({ type: 'SET_ERRORS', payload: newErrors });
+  };
+
+  // Function to validate a step
+  const validateStep = useCallback(
+    async (
+      validationSchema: yup.ObjectSchema<any>,
+      fieldsToValidate: string[],
+    ): Promise<boolean> => {
+      const errors = await validateSchemaPartially(
+        validationSchema,
+        state.formData,
+        fieldsToValidate,
+      );
+      if (Object.keys(errors).length === 0) {
+        setErrors({});
+        return true;
+      } else {
+        setErrors(errors);
+        return false;
+      }
+    },
+    [state.formData],
+  );
+
+  // Function to handle submitting the step
+  const handleSubmitStep = async (
+    validationSchema: yup.ObjectSchema<any>,
+    fieldsToValidate: string[],
+    nextScreen: Href<string | object>,
+  ): Promise<void> => {
+    const isValid = await validateStep(validationSchema, fieldsToValidate);
+    if (isValid) {
+      nextStep();
+      router.push(nextScreen);
     }
   };
 
+  // Function to navigate to the next step
+  const nextStep = () => {
+    dispatch({ type: 'NEXT_STEP' });
+  };
+
+  // Function to navigate to the previous step
   const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-    if (router.canGoBack()) {
-      router.back();
-    }
+    dispatch({ type: 'PREV_STEP' });
+    router.back();
   };
 
   return (
     <RegistrationContext.Provider
-      value={{ user, steps, currentStep, nextStep, prevStep }}
+      value={{
+        state,
+        steps,
+        setFormData,
+        setErrors,
+        validateStep,
+        handleSubmitStep,
+        nextStep,
+        prevStep,
+      }}
     >
       {children}
     </RegistrationContext.Provider>
   );
 };
 
-export const useRegistration = () => {
+// Hook to use the RegistrationContext
+export const useRegistration = (): RegistrationContextProps => {
   const context = useContext(RegistrationContext);
   if (!context) {
     throw new Error(
