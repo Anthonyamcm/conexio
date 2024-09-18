@@ -75,14 +75,10 @@ export default function Dob() {
         onSubmit={handleSubmit}
       >
         {({
-          handleChange,
           handleSubmit,
-          handleBlur,
-          values,
           errors,
           touched,
           isValid,
-          isSubmitting,
           setFieldValue,
           setFieldTouched,
         }) => (
@@ -101,7 +97,7 @@ export default function Dob() {
               ]}
               onPress={() => handleSubmit()}
               disabled={!isValid}
-              isLoading={!isSubmitting}
+              isLoading={false}
             >
               {'Continue'}
             </Button>
