@@ -1,20 +1,12 @@
-import {
-  Button,
-  Footer,
-  Input,
-  Screen,
-  Text,
-  View,
-} from '@/src/components/atoms';
-import { colors, spacing } from '@/src/utlis';
+import { Button, Footer, Input, Screen, Text } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
+import { colors, spacing } from '@/src/utlis';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Formik } from 'formik';
-import * as yup from 'yup';
 import { useRef } from 'react';
-import { TextInput } from 'react-native';
-//TODO: Fix inline styles and convert to styleSheet
+import { StyleSheet, TextInput, View } from 'react-native';
+import * as yup from 'yup';
 
 const nameSchema = yup.object().shape({
   name: yup.string().required('Name is required').min(3).max(32),
@@ -29,25 +21,15 @@ export default function Name() {
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     setFormData(values);
-
     await handleSubmitStep(nameSchema, ['name']);
-
     setSubmitting(false);
   };
 
   return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={{
-        flex: 1,
-        padding: spacing.lg,
-      }}
-    >
+    <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
-        title={`What's your name?`}
-        subtitle={
-          'Enter the name on which you wish to be known as, this will be your display name'
-        }
+        title="What's your name?"
+        subtitle="Enter the name on which you wish to be known as; this will be your display name"
       />
       <Formik
         initialValues={state.formData}
@@ -64,9 +46,9 @@ export default function Name() {
           isValid,
           isSubmitting,
         }) => (
-          <View preset={'column'} style={{ flex: 1 }}>
+          <View style={styles.formContainer}>
             <Input
-              placeholder={'Name'}
+              placeholder="Name"
               LeftAccessory={() => (
                 <Ionicons
                   name="person"
@@ -76,35 +58,25 @@ export default function Name() {
                       ? colors.palette.error100
                       : colors.palette.neutral400
                   }
-                  style={{
-                    alignSelf: 'center',
-                    marginStart: 6,
-                    opacity: errors.name && touched.name ? 0.8 : 1,
-                  }}
+                  style={styles.icon}
                 />
               )}
               value={values.name}
               onChangeText={(text) => {
                 handleChange('name')(text);
-                // Update context on change
                 setFormData({ ...values, name: text });
               }}
               onBlur={handleBlur('name')}
               ref={nameRef}
               error={!!errors.name && touched.name}
             />
-            {(errors.name && touched.name) || (errors.name && touched.name) ? (
-              <Text
-                weight="medium"
-                style={{
-                  color: colors.palette.error100,
-                }}
-              >
+            {errors.name && touched.name && (
+              <Text weight="medium" style={styles.errorText}>
                 {errors.name}
               </Text>
-            ) : null}
+            )}
             <Button
-              preset={'gradient'}
+              preset="gradient"
               gradient={[
                 colors.palette.primary100,
                 colors.palette.secondary100,
@@ -113,7 +85,7 @@ export default function Name() {
               disabled={!isValid}
               isLoading={isSubmitting}
             >
-              {'Continue'}
+              Continue
             </Button>
           </View>
         )}
@@ -122,3 +94,25 @@ export default function Name() {
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: spacing.lg,
+  },
+  formContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 15, // Note: Use a space unit consistent with your design system if necessary
+  },
+  icon: {
+    alignSelf: 'center',
+    marginStart: 6,
+    opacity: 1,
+  },
+  errorText: {
+    color: colors.palette.error100,
+    marginTop: 5,
+    fontWeight: '500',
+  },
+});

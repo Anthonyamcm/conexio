@@ -141,6 +141,18 @@ export default function Password() {
                   style={styles.icon}
                 />
               )}
+              RightAccessory={() => (
+                <TouchableOpacity
+                  onPress={toggleShowPassword}
+                  style={[styles.icon, { marginEnd: 12 }]}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye' : 'eye-off'}
+                    size={26}
+                    color={colors.palette.neutral400}
+                  />
+                </TouchableOpacity>
+              )}
               value={values.confirmPassword}
               onChangeText={(text) => {
                 handleChange('confirmPassword')(text);
