@@ -58,16 +58,6 @@ export default function Password() {
       : colors.palette.neutral400;
   };
 
-  // Memoized password strength feedback for enhanced UX
-  const passwordStrength = useMemo(() => {
-    if (state.formData.password?.length >= 8) {
-      return 'Strong';
-    } else if (state.formData.password?.length >= 4) {
-      return 'Weak';
-    }
-    return 'Very Weak';
-  }, [state.formData.password]);
-
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
