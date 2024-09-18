@@ -139,8 +139,16 @@ const baseTextStyle: TextStyle = {
   zIndex: 2,
 };
 
-const rightAccessoryStyle: ViewStyle = { marginStart: spacing.xs, zIndex: 1 };
-const leftAccessoryStyle: ViewStyle = { marginEnd: spacing.xs, zIndex: 1 };
+const rightAccessoryStyle: ViewStyle = {
+  marginStart: spacing.xs,
+  alignSelf: 'center',
+  zIndex: 1,
+};
+const leftAccessoryStyle: ViewStyle = {
+  marginEnd: spacing.xs,
+  alignSelf: 'center',
+  zIndex: 1,
+};
 
 // TODO: Fix typings
 const viewPresets = {

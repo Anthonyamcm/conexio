@@ -1,11 +1,4 @@
-import {
-  Keyboard,
-  NativeSyntheticEvent,
-  Text,
-  TextInput,
-  TextInputKeyPressEventData,
-  View,
-} from 'react-native';
+import { Text, View } from 'react-native';
 import { Input } from '../atoms';
 import { forwardRef, useImperativeHandle, useRef, useCallback } from 'react';
 import useDateOfBirthInput, {
@@ -27,10 +20,6 @@ const DateOfBirthInput = forwardRef<
   DateOfBirthInputHandle,
   DateOfBirthInputProps
 >(({ setFieldValue, setFieldTouched, touched, error }, ref) => {
-  const dayInputRef = useRef<TextInput | null>(null);
-  const monthInputRef = useRef<TextInput | null>(null);
-  const yearInputRef = useRef<TextInput | null>(null);
-
   const {
     day,
     month,
@@ -41,6 +30,9 @@ const DateOfBirthInput = forwardRef<
     handleKeyPress,
     resetFields,
     isComplete,
+    dayInputRef,
+    monthInputRef,
+    yearInputRef,
   }: DateOfBirthInputReturnType = useDateOfBirthInput(setFieldValue);
 
   // Imperative handle for external components to reset input

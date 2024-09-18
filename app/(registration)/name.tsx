@@ -13,7 +13,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 import { useRef } from 'react';
-import { TextInput } from 'react-native-gesture-handler';
+import { TextInput } from 'react-native';
 //TODO: Fix inline styles and convert to styleSheet
 
 const nameSchema = yup.object().shape({

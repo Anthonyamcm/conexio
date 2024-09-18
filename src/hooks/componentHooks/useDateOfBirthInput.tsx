@@ -24,6 +24,9 @@ export interface DateOfBirthInputReturnType {
     prevRef?: RefObject<TextInput>,
   ) => void;
   resetFields: () => void;
+  dayInputRef: React.RefObject<TextInput>;
+  monthInputRef: React.RefObject<TextInput>;
+  yearInputRef: React.RefObject<TextInput>;
 }
 
 const useDateOfBirthInput = (
@@ -32,6 +35,7 @@ const useDateOfBirthInput = (
   const dayInputRef = useRef<TextInput | null>(null);
   const monthInputRef = useRef<TextInput | null>(null);
   const yearInputRef = useRef<TextInput | null>(null);
+
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
   const [year, setYear] = useState('');
@@ -121,6 +125,9 @@ const useDateOfBirthInput = (
     handleKeyPress,
     resetFields,
     isComplete,
+    dayInputRef,
+    monthInputRef,
+    yearInputRef,
   };
 };
 
