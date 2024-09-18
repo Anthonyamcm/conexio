@@ -1,12 +1,36 @@
 import { useMemo } from 'react';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { TouchableOpacity, View, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { Step } from '../atoms';
 import { spacing } from '@/src/utlis';
 import { Entypo } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function Stepper() {
-  const { steps, prevStep } = useRegistration();
+  const { steps, prevStep, state } = useRegistration();
+
+  const showAlert = () => {
+    if (state.currentStep === 0) {
+      Alert.alert(
+        'Cancel creating account?',
+        'Are you sure you want to cancel creating an account',
+        [
+          {
+            text: `Yes i'm sure `,
+            onPress: () => router.back(),
+            style: 'cancel',
+          },
+          {
+            text: 'No continue',
+            onPress: () => console.log('Here'),
+          },
+        ],
+        { cancelable: false }, // Prevents dismissing the alert by tapping outside
+      );
+    } else {
+      prevStep();
+    }
+  };
 
   // Memoize container style for steps
   const stepContainerStyle = useMemo(
@@ -18,7 +42,7 @@ export default function Stepper() {
 
   return (
     <View style={styles.stepperContainer}>
-      <TouchableOpacity onPress={prevStep}>
+      <TouchableOpacity onPress={showAlert}>
         <Entypo name="chevron-left" size={32} color="black" />
       </TouchableOpacity>
       <View style={stepContainerStyle}>
