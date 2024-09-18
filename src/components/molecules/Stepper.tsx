@@ -7,7 +7,7 @@ import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 export default function Stepper() {
-  const { steps, prevStep, state } = useRegistration();
+  const { steps, prevStep, state, clearFormData } = useRegistration();
 
   const showAlert = () => {
     if (state.currentStep === 0) {
@@ -17,7 +17,10 @@ export default function Stepper() {
         [
           {
             text: `Yes i'm sure `,
-            onPress: () => router.back(),
+            onPress: () => {
+              clearFormData();
+              router.back();
+            },
             style: 'cancel',
           },
           {

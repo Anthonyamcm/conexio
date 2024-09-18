@@ -1,8 +1,10 @@
 import { Link, router } from 'expo-router';
 import { Alert, TouchableOpacity, View } from 'react-native';
 import { Text } from './Text';
+import { useRegistration } from '@/src/contexts/RegistrationContext';
 
 export default function Footer() {
+  const { clearFormData } = useRegistration();
   const showAlert = () => {
     Alert.alert(
       'Alread have an account?',
@@ -10,7 +12,9 @@ export default function Footer() {
       [
         {
           text: `Log in`,
-          onPress: () => router.back(),
+          onPress: () => {
+            clearFormData(), router.back();
+          },
         },
         {
           text: 'Continue creating account',

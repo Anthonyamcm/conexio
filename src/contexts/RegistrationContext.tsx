@@ -44,7 +44,8 @@ type RegistrationAction =
   | { type: 'SET_FORM_DATA'; payload: Partial<FormData> }
   | { type: 'SET_ERRORS'; payload: { [key: string]: string } }
   | { type: 'NEXT_STEP' }
-  | { type: 'PREV_STEP' };
+  | { type: 'PREV_STEP' }
+  | { type: 'CLEAR_FORM_DATA' }; // New action
 
 // Reducer function
 const registrationReducer = (
@@ -72,6 +73,11 @@ const registrationReducer = (
       return { ...state, currentStep: state.currentStep + 1 };
     case 'PREV_STEP':
       return { ...state, currentStep: state.currentStep - 1 };
+    case 'CLEAR_FORM_DATA': // Handle clearing form data
+      return {
+        ...state,
+        formData: initialState.formData,
+      };
     default:
       return state;
   }
@@ -93,6 +99,7 @@ interface RegistrationContextProps {
   ) => Promise<void>;
   nextStep: () => void;
   prevStep: () => void;
+  clearFormData: () => void;
 }
 
 interface RegistrationProviderProps {
@@ -117,6 +124,10 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
     'otp',
     'password',
   ];
+
+  const clearFormData = () => {
+    dispatch({ type: 'CLEAR_FORM_DATA' });
+  };
 
   // Function to update form data
   const setFormData = (newData: Partial<FormData>) => {
@@ -209,6 +220,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
         handleSubmitStep,
         nextStep,
         prevStep,
+        clearFormData,
       }}
     >
       {children}
