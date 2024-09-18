@@ -14,7 +14,14 @@ export default function Layout() {
         }}
       >
         <Stepper />
-        <Stack screenOptions={{ headerShown: false }}>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+
+            animation: 'fade',
+            animationDuration: 300,
+          }}
+        >
           <Stack.Screen name="name" />
           <Stack.Screen name="username" />
           <Stack.Screen name="dob" />
