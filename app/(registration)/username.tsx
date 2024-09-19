@@ -135,7 +135,9 @@ export default function Username() {
               error={!!errors.username && !isChecking}
             />
             {errors.username && !isChecking && (
-              <Text style={styles.errorText}>{errors.username}</Text>
+              <Text weight="medium" style={styles.errorText}>
+                {errors.username}
+              </Text>
             )}
 
             <Button
@@ -175,6 +177,5 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: colors.palette.error100,
-    marginTop: 5,
   },
 });
