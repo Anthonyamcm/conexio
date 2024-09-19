@@ -47,6 +47,10 @@ export default function Username() {
       values: { username: string },
       { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
+      if (!(await checkUsernameAvailability(values.username))) {
+        setSubmitting(false);
+        return;
+      }
       setFormData(values);
       await handleSubmitStep(usernameSchema, ['username']);
       setSubmitting(false);
@@ -61,8 +65,8 @@ export default function Username() {
       setIsChecking(true);
       try {
         const isAvailable = await checkUsernameAvailability(username);
-        if (!isAvailable) {
-          console.log('Username is taken');
+        if (isAvailable) {
+          setFormData({ username });
         }
       } catch (error) {
         console.error('Error checking username availability:', error);
@@ -124,7 +128,6 @@ export default function Username() {
               value={values.username}
               onChangeText={(text) => {
                 handleChange('username')(text);
-                setFormData({ ...values, username: text });
                 handleCheckUsernameAvailability(text);
               }}
               onBlur={handleBlur('username')}
