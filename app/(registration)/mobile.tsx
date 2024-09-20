@@ -25,6 +25,7 @@ interface CountryCode {
 interface CustomInputWithCountryCodeProps extends InputProps {
   countryCode: CountryCode; // Change to an object if needed
   onCountryCodePress: () => void;
+  showError: boolean | undefined;
 }
 
 const CustomInputWithCountryCode = ({
@@ -32,7 +33,17 @@ const CustomInputWithCountryCode = ({
   onCountryCodePress,
   ...inputProps
 }: CustomInputWithCountryCodeProps) => (
-  <View style={styles.inputContainer}>
+  <View
+    style={[
+      styles.inputContainer,
+      {
+        borderColor: inputProps.showError
+          ? colors.palette.error100
+          : colors.palette.neutral200,
+        borderWidth: 3,
+      },
+    ]}
+  >
     <TouchableOpacity
       style={styles.countryCodeContainer}
       onPress={onCountryCodePress}
@@ -108,9 +119,10 @@ export default function Mobile() {
                 setFormData({ ...values, mobile: text });
               }}
               containerStyle={{ flex: 1 }}
+              inputWrapperStyle={{ borderWidth: 0 }}
               onBlur={handleBlur('mobile')}
               ref={mobileRef}
-              error={!!errors.mobile && touched.mobile}
+              showError={!!errors.mobile && touched.mobile}
               accessibilityLabel="Mobile number input"
             />
             {errors.mobile && touched.mobile && (
