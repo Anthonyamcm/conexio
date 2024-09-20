@@ -1,13 +1,17 @@
 import { Button, Footer, Input, Screen, Text } from '@/src/components/atoms';
+import { InputProps } from '@/src/components/atoms/Input';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Formik } from 'formik';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import {
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+} from 'react-native-gesture-handler';
 import * as Yup from 'yup';
 
 // Define the validation schema using Yup
@@ -17,12 +21,46 @@ const mobileSchema = Yup.object().shape({
     .required('Mobile number is required'),
 });
 
+interface CountryCode {
+  code: string;
+  flag: string;
+}
+
+interface CustomInputWithCountryCodeProps extends InputProps {
+  countryCode: CountryCode; // Change to an object if needed
+  onCountryCodePress: () => void;
+}
+
+const CustomInputWithCountryCode = ({
+  countryCode,
+  onCountryCodePress,
+  ...inputProps
+}: CustomInputWithCountryCodeProps) => (
+  <View style={styles.inputContainer}>
+    <TouchableOpacity
+      style={styles.countryCodeContainer}
+      onPress={onCountryCodePress}
+    >
+      <Text preset="bold" style={styles.countryCodeText}>
+        {countryCode.flag}
+      </Text>
+      <Text preset="bold" style={styles.countryCodeText}>
+        {countryCode.code}
+      </Text>
+    </TouchableOpacity>
+    <Input
+      placeholder="Mobile number"
+      keyboardType="number-pad"
+      {...inputProps}
+    />
+  </View>
+);
+
 export default function Mobile() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
   const mobileRef = useRef<TextInput>(null);
   const [show, setShow] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState('+44');
-  const [flag, setFlag] = useState('🇬🇧');
+  const [countryCode, setCountryCode] = useState({ code: '+44', flag: '🇬🇧' });
 
   const handleSubmit = async (
     values: { mobile: string },
@@ -34,7 +72,13 @@ export default function Mobile() {
   };
 
   const handleCountryCodePress = () => {
+    mobileRef.current?.blur();
     setShow(true);
+  };
+
+  const handleCountrySelect = (country: { code: string; flag: string }) => {
+    setCountryCode(country);
+    setShow(false);
   };
 
   return (
@@ -59,29 +103,17 @@ export default function Mobile() {
           isSubmitting,
         }) => (
           <View style={styles.formContainer}>
-            <Input
-              placeholder="Mobile number"
-              LeftAccessory={() => (
-                <TouchableOpacity
-                  style={styles.countryCodeContainer}
-                  onPress={handleCountryCodePress}
-                >
-                  <Text preset="bold" style={styles.countryCodeText}>
-                    {flag}
-                  </Text>
-                  <Text preset="bold" style={styles.countryCodeText}>
-                    {countryCode}
-                  </Text>
-                </TouchableOpacity>
-              )}
+            <CustomInputWithCountryCode
+              countryCode={countryCode}
+              onCountryCodePress={handleCountryCodePress}
               value={values.mobile}
               onChangeText={(text) => {
                 handleChange('mobile')(text);
                 setFormData({ ...values, mobile: text });
               }}
+              containerStyle={{ flex: 1 }}
               onBlur={handleBlur('mobile')}
               ref={mobileRef}
-              keyboardType="number-pad"
               error={!!errors.mobile && touched.mobile}
               accessibilityLabel="Mobile number input"
             />
@@ -112,7 +144,7 @@ export default function Mobile() {
         onBackdropPress={() => setShow(false)}
         style={{
           modal: {
-            height: 800,
+            height: 700,
           },
           line: {
             opacity: 0,
@@ -136,8 +168,7 @@ export default function Mobile() {
         }}
         // when picker button press you will get the country object with dial code
         pickerButtonOnPress={(item) => {
-          setCountryCode(item.dial_code);
-          setFlag(item.flag);
+          handleCountrySelect({ code: item.dial_code, flag: item.flag });
           console.log({ item });
           setShow(false);
         }}
@@ -156,10 +187,13 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 15, // Use a space unit consistent with your design system if necessary
   },
-  icon: {
-    alignSelf: 'center',
-    marginStart: 6,
-    opacity: 1,
+  // TODO: Fix dimension so that its responsive
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    maxHeight: 54,
+    backgroundColor: colors.palette.neutral200,
   },
   errorText: {
     color: colors.palette.error100,
@@ -169,12 +203,11 @@ const styles = StyleSheet.create({
   countryCodeContainer: {
     flexDirection: 'row',
     alignSelf: 'center',
-    marginTop: 10,
-    marginStart: 6,
+    marginStart: 12,
   },
   countryCodeText: {
     textAlign: 'center',
     fontSize: 16,
-    marginRight: 5,
+    marginRight: 12,
   },
 });

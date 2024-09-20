@@ -26,6 +26,7 @@ export interface InputAccessoryProps {
 
 export interface InputProps extends Omit<TextInputProps, 'ref'> {
   error?: boolean;
+  ref?: React.RefObject<TextInput>;
   label?: TextProps['text'];
   LabelTextProps?: TextProps;
   helper?: TextProps['text'];
