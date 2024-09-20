@@ -55,6 +55,14 @@ const CustomInputWithCountryCode = ({
         {countryCode.code}
       </Text>
     </TouchableOpacity>
+    <View
+      style={{
+        width: 3,
+        backgroundColor: colors.palette.neutral300,
+        borderRadius: 12,
+        paddingVertical: 15,
+      }}
+    />
     <Input
       placeholder="Mobile number"
       keyboardType="number-pad"
