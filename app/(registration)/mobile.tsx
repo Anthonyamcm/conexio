@@ -4,7 +4,7 @@ import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
 import { Formik } from 'formik';
-import { useRef, useState } from 'react';
+import { forwardRef, memo, useCallback, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -28,47 +28,48 @@ interface CustomInputWithCountryCodeProps extends InputProps {
   showError: boolean | undefined;
 }
 
-const CustomInputWithCountryCode = ({
-  countryCode,
-  onCountryCodePress,
-  ...inputProps
-}: CustomInputWithCountryCodeProps) => (
-  <View
-    style={[
-      styles.inputContainer,
-      {
-        borderColor: inputProps.showError
-          ? colors.palette.error100
-          : colors.palette.neutral200,
-        borderWidth: 3,
-      },
-    ]}
-  >
-    <TouchableOpacity
-      style={styles.countryCodeContainer}
-      onPress={onCountryCodePress}
-    >
-      <Text preset="bold" style={styles.countryCodeText}>
-        {countryCode.flag}
-      </Text>
-      <Text preset="bold" style={styles.countryCodeText}>
-        {countryCode.code}
-      </Text>
-    </TouchableOpacity>
-    <View
-      style={{
-        width: 3,
-        backgroundColor: colors.palette.neutral300,
-        borderRadius: 12,
-        paddingVertical: 15,
-      }}
-    />
-    <Input
-      placeholder="Mobile number"
-      keyboardType="number-pad"
-      {...inputProps}
-    />
-  </View>
+const CustomInputWithCountryCode = memo(
+  forwardRef<TextInput, CustomInputWithCountryCodeProps>(
+    ({ countryCode, onCountryCodePress, showError, ...inputProps }, ref) => (
+      <View
+        style={[
+          styles.inputContainer,
+          {
+            borderColor: showError
+              ? colors.palette.error100
+              : colors.palette.neutral200,
+            borderWidth: 3,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.countryCodeContainer}
+          onPress={onCountryCodePress}
+        >
+          <Text preset="bold" style={styles.countryCodeText}>
+            {countryCode.flag}
+          </Text>
+          <Text preset="bold" style={styles.countryCodeText}>
+            {countryCode.code}
+          </Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            width: 3,
+            backgroundColor: colors.palette.neutral300,
+            borderRadius: 12,
+            paddingVertical: 15,
+          }}
+        />
+        <Input
+          ref={ref} // Pass ref to the Input component
+          placeholder="Mobile number"
+          keyboardType="number-pad"
+          {...inputProps} // Spread remaining props
+        />
+      </View>
+    ),
+  ),
 );
 
 export default function Mobile() {
@@ -86,15 +87,15 @@ export default function Mobile() {
     setSubmitting(false);
   };
 
-  const handleCountryCodePress = () => {
+  const handleCountryCodePress = useCallback(() => {
     mobileRef.current?.blur();
     setShow(true);
-  };
+  }, []);
 
-  const handleCountrySelect = (country: { code: string; flag: string }) => {
+  const handleCountrySelect = useCallback((country: CountryCode) => {
     setCountryCode(country);
     setShow(false);
-  };
+  }, []);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -150,6 +151,9 @@ export default function Mobile() {
             >
               Continue
             </Button>
+            <Button preset="reversed" textStyle={{ fontWeight: '300' }}>
+              {'Sign up with email'}
+            </Button>
           </View>
         )}
       </Formik>
@@ -185,7 +189,6 @@ export default function Mobile() {
         // when picker button press you will get the country object with dial code
         pickerButtonOnPress={(item) => {
           handleCountrySelect({ code: item.dial_code, flag: item.flag });
-          console.log({ item });
           setShow(false);
         }}
       />
