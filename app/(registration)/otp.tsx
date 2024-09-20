@@ -8,7 +8,7 @@ export default function Otp() {
   const { nextStep } = useRegistration();
   const continuePressed = () => {
     nextStep();
-    router.push('/(registration)/password');
+    router.push('/(registration)/name');
   };
 
   return (

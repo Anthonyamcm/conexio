@@ -5,7 +5,7 @@ import { colors, spacing } from '@/src/utlis';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Formik } from 'formik';
 import { useRef } from 'react';
-import { Keyboard, StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, TextInput, View } from 'react-native';
 import * as yup from 'yup';
 
 const nameSchema = yup.object().shape({

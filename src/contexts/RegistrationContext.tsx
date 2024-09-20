@@ -13,7 +13,8 @@ import { router } from 'expo-router';
 interface FormData {
   name: string;
   dob: Date;
-  email: string;
+  email?: string;
+  mobile?: string;
   password: string;
   confirmPassword: string;
   username: string;
@@ -32,6 +33,7 @@ const initialState: RegistrationState = {
     name: '',
     dob: new Date(),
     email: '',
+    mobile: '',
     password: '',
     confirmPassword: '',
     username: '',
@@ -189,22 +191,22 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
     console.log(state.currentStep);
     switch (state.currentStep) {
       case 0:
-        router.push('/(registration)/username');
+        router.push('/(registration)/otp');
         break;
       case 1:
-        router.push('/(registration)/dob');
+        router.push('/(registration)/name');
         break;
       case 2:
-        router.push('/(registration)/mobile');
+        router.push('/(registration)/username');
         break;
       case 3:
-        router.push('/(registration)/otp');
+        router.push('/(registration)/dob');
         break;
       case 4:
         router.push('/(registration)/password');
         break;
       default:
-        router.push('/(registration)/name');
+        router.push('/(registration)/mobile');
         break;
     }
   };
