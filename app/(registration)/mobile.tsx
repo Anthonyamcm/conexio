@@ -3,15 +3,11 @@ import { InputProps } from '@/src/components/atoms/Input';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Formik } from 'formik';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
-import {
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as Yup from 'yup';
 
 // Define the validation schema using Yup
