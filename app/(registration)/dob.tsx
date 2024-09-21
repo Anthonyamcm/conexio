@@ -2,7 +2,6 @@ import { Button, Footer, Screen, Text, View } from '@/src/components/atoms';
 import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
-import { router } from 'expo-router';
 import { Formik } from 'formik';
 import * as yup from 'yup';
 
@@ -47,7 +46,7 @@ export default function Dob() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
 
   const handleSubmit = async (
-    values: { dob: Date },
+    values: { dob: Date | null },
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     setFormData(values);
@@ -77,6 +76,7 @@ export default function Dob() {
         {({
           handleSubmit,
           errors,
+          values,
           touched,
           isValid,
           setFieldValue,
@@ -84,6 +84,7 @@ export default function Dob() {
         }) => (
           <View preset={'column'} style={{ flex: 1 }}>
             <DateOfBirthInput
+              value={values.dob}
               setFieldValue={setFieldValue}
               setFieldTouched={setFieldTouched}
               touched={touched as { dob: boolean }}

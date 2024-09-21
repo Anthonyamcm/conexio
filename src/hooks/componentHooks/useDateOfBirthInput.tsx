@@ -6,14 +6,14 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 
-interface DateInputParams {
-  setFieldValue: (field: string, value: Date) => void;
-}
-
-export interface DateOfBirthInputReturnType {
+type DobDate = {
   day: string;
   month: string;
   year: string;
+};
+
+export interface DateOfBirthInputReturnType {
+  date: DobDate;
   isComplete: boolean;
   handleDayChange: (text: string) => void;
   handleMonthChange: (text: string) => void;
@@ -31,27 +31,46 @@ export interface DateOfBirthInputReturnType {
 
 const useDateOfBirthInput = (
   setFieldValue: (field: string, value: Date) => void,
+  value: Date | null,
 ) => {
   const dayInputRef = useRef<TextInput | null>(null);
   const monthInputRef = useRef<TextInput | null>(null);
   const yearInputRef = useRef<TextInput | null>(null);
-
-  const [day, setDay] = useState('');
-  const [month, setMonth] = useState('');
-  const [year, setYear] = useState('');
+  const prevValueRef = useRef(value);
+  const [date, setDate] = useState<DobDate>({ day: '', month: '', year: '' });
 
   const isComplete =
-    day.length === 2 && month.length === 2 && year.length === 4;
+    date.day.length === 2 && date.month.length === 2 && date.year.length === 4;
 
-  // Consolidate changes into one useEffect
+  // Populate fields if value changes
+  useEffect(() => {
+    console.log(prevValueRef);
+    console.log({ value });
+    if (value instanceof Date && prevValueRef.current === value) {
+      setDate({
+        day: String(value.getDate()).padStart(2, '0'),
+        month: String(value.getMonth() + 1).padStart(2, '0'),
+        year: String(value.getFullYear()),
+      });
+    }
+    prevValueRef.current = value; // Update the ref to the latest value
+  }, [value]);
+
+  // Consolidate the main logic into one useEffect
   useEffect(() => {
     if (isComplete) {
+      const { day, month, year } = date;
       const dateString = `${year}-${month}-${day}`;
-      const date = new Date(dateString);
-      setFieldValue('dob', date);
-      Keyboard.dismiss();
+      const dateObject = new Date(dateString);
+
+      if (!isNaN(dateObject.getTime())) {
+        setFieldValue('dob', dateObject);
+        Keyboard.dismiss();
+      } else {
+        console.error('Invalid date:', dateString);
+      }
     }
-  }, [day, month, year, isComplete, setFieldValue]);
+  }, [isComplete, date, setFieldValue]);
 
   const InputChangeHandler = useCallback(
     (
@@ -87,7 +106,7 @@ const useDateOfBirthInput = (
 
   const handleDayChange = useCallback(
     (text: string) => {
-      setDay(text);
+      setDate((prev) => ({ ...prev, day: text }));
       InputChangeHandler(text, monthInputRef, undefined); // Adjust based on which fields you focus on
     },
     [InputChangeHandler],
@@ -95,7 +114,7 @@ const useDateOfBirthInput = (
 
   const handleMonthChange = useCallback(
     (text: string) => {
-      setMonth(text);
+      setDate((prev) => ({ ...prev, month: text }));
       InputChangeHandler(text, yearInputRef, dayInputRef); // Adjust as needed
     },
     [InputChangeHandler],
@@ -103,22 +122,21 @@ const useDateOfBirthInput = (
 
   const handleYearChange = useCallback(
     (text: string) => {
-      setYear(text);
+      setDate((prev) => ({ ...prev, year: text }));
       InputChangeHandler(text, undefined, monthInputRef); // Adjust as needed
     },
     [InputChangeHandler],
   );
 
   const resetFields = useCallback(() => {
-    setDay('');
-    setMonth('');
-    setYear('');
+    setDate((prev) => ({ ...prev, name: '', month: '', year: '' }));
+    if (dayInputRef.current) dayInputRef.current.clear();
+    if (monthInputRef.current) monthInputRef.current.clear();
+    if (yearInputRef.current) yearInputRef.current.clear();
   }, []);
 
   return {
-    day,
-    month,
-    year,
+    date,
     handleDayChange,
     handleMonthChange,
     handleYearChange,

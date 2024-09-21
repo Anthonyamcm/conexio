@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 // Define the shape of the form data
 interface FormData {
   name: string;
-  dob: Date;
+  dob: Date | null;
   email?: string;
   mobile?: string;
   password: string;
@@ -31,7 +31,7 @@ const initialState: RegistrationState = {
   currentStep: 0,
   formData: {
     name: '',
-    dob: new Date(),
+    dob: null,
     email: '',
     mobile: '',
     password: '',
@@ -188,7 +188,6 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   };
 
   const goToNextScreen = (): void => {
-    console.log(state.currentStep);
     switch (state.currentStep) {
       case 0:
         router.push('/(registration)/otp');

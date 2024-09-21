@@ -6,10 +6,11 @@ import useDateOfBirthInput, {
 } from '@/src/hooks/componentHooks/useDateOfBirthInput';
 
 interface DateOfBirthInputProps {
-  setFieldValue: (field: string, value: Date) => void;
+  setFieldValue: (field: string, value: Date | null) => void;
   setFieldTouched: (field: string, isTouched: boolean) => void;
   touched: { dob?: boolean };
   error?: string;
+  value: Date | null;
 }
 
 export interface DateOfBirthInputHandle {
@@ -19,11 +20,9 @@ export interface DateOfBirthInputHandle {
 const DateOfBirthInput = forwardRef<
   DateOfBirthInputHandle,
   DateOfBirthInputProps
->(({ setFieldValue, setFieldTouched, touched, error }, ref) => {
+>(({ setFieldValue, setFieldTouched, touched, error, value }, ref) => {
   const {
-    day,
-    month,
-    year,
+    date,
     handleDayChange,
     handleMonthChange,
     handleYearChange,
@@ -33,13 +32,13 @@ const DateOfBirthInput = forwardRef<
     dayInputRef,
     monthInputRef,
     yearInputRef,
-  }: DateOfBirthInputReturnType = useDateOfBirthInput(setFieldValue);
+  }: DateOfBirthInputReturnType = useDateOfBirthInput(setFieldValue, value);
 
   // Imperative handle for external components to reset input
   useImperativeHandle(ref, () => ({
     reset() {
       resetFields();
-      setFieldValue('dob', new Date());
+      setFieldValue('dob', null);
       dayInputRef.current?.focus();
     },
   }));
@@ -60,9 +59,9 @@ const DateOfBirthInput = forwardRef<
           maxLength={2}
           ref={dayInputRef}
           onChangeText={handleDayChange}
-          onKeyPress={(e) => handleKeyPress(e, day, undefined)}
+          onKeyPress={(e) => handleKeyPress(e, date.day, undefined)}
           onBlur={handleBlur}
-          value={day}
+          value={date.day}
           error={!!error && touched.dob && isComplete}
         />
         <Input
@@ -73,9 +72,9 @@ const DateOfBirthInput = forwardRef<
           maxLength={2}
           ref={monthInputRef}
           onChangeText={handleMonthChange}
-          onKeyPress={(e) => handleKeyPress(e, month, dayInputRef)}
+          onKeyPress={(e) => handleKeyPress(e, date.month, dayInputRef)}
           onBlur={handleBlur}
-          value={month}
+          value={date.month}
           error={!!error && touched.dob && isComplete}
         />
         <Input
@@ -86,9 +85,9 @@ const DateOfBirthInput = forwardRef<
           maxLength={4}
           ref={yearInputRef}
           onChangeText={handleYearChange}
-          onKeyPress={(e) => handleKeyPress(e, year, monthInputRef)}
+          onKeyPress={(e) => handleKeyPress(e, date.year, monthInputRef)}
           onBlur={handleBlur}
-          value={year}
+          value={date.year}
           error={!!error && touched.dob && isComplete}
         />
       </View>
