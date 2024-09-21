@@ -4,7 +4,7 @@ import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Formik } from 'formik';
-import { useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import * as yup from 'yup';
 
@@ -16,14 +16,17 @@ export default function Name() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
   const nameRef = useRef<TextInput>(null);
 
-  const handleSubmit = async (
-    values: { name: string },
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-  ) => {
-    setFormData(values);
-    await handleSubmitStep(nameSchema, ['name']);
-    setSubmitting(false);
-  };
+  const handleSubmit = useCallback(
+    async (
+      values: { name: string },
+      { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+    ) => {
+      setFormData(values);
+      await handleSubmitStep(nameSchema, ['name']);
+      setSubmitting(false);
+    },
+    [setFormData, handleSubmitStep],
+  );
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>

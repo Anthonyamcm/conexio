@@ -4,7 +4,6 @@ import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
 import { MaterialIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { useState } from 'react';
@@ -44,14 +43,14 @@ export default function Username() {
   // Handle form submission
   const handleSubmit = useCallback(
     async (
-      values: { username: string },
+      value: { username: string },
       { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
-      if (!(await checkUsernameAvailability(values.username))) {
+      if (!(await checkUsernameAvailability(value.username))) {
         setSubmitting(false);
         return;
       }
-      setFormData(values);
+      setFormData(value);
       await handleSubmitStep(usernameSchema, ['username']);
       setSubmitting(false);
     },

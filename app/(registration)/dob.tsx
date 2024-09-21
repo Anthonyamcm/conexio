@@ -51,7 +51,7 @@ export default function Dob() {
   ) => {
     setFormData(values);
 
-    await handleSubmitStep(dobSchema, ['name']);
+    await handleSubmitStep(dobSchema, ['dob']);
 
     setSubmitting(false);
   };

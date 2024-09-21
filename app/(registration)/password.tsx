@@ -34,7 +34,6 @@ export default function Password() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (
     values: { password: string; confirmPassword: string },
@@ -45,9 +44,6 @@ export default function Password() {
     setSubmitting(false);
   };
 
-  // Function to toggle password visibility
-  const toggleShowPassword = () => setShowPassword(!showPassword);
-
   // Memoized function to generate the appropriate icon color for form fields
   const iconColor = (
     error: string | undefined,
@@ -57,6 +53,16 @@ export default function Password() {
       ? colors.palette.error100
       : colors.palette.neutral400;
   };
+
+  function usePasswordToggle() {
+    const [visible, setVisible] = useState(false);
+    const toggleVisibility = () => setVisible(!visible);
+
+    return { visible, toggleVisibility };
+  }
+
+  const passwordToggle = usePasswordToggle();
+  const confirmPasswordToggle = usePasswordToggle();
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -82,7 +88,7 @@ export default function Password() {
           <View style={styles.formContainer}>
             <Input
               placeholder="Password"
-              secureTextEntry={!showPassword}
+              secureTextEntry={!passwordToggle.visible}
               LeftAccessory={() => (
                 <Ionicons
                   name="lock-closed"
@@ -93,11 +99,11 @@ export default function Password() {
               )}
               RightAccessory={() => (
                 <TouchableOpacity
-                  onPress={toggleShowPassword}
+                  onPress={passwordToggle.toggleVisibility}
                   style={[styles.icon, { marginEnd: 12 }]}
                 >
                   <Ionicons
-                    name={showPassword ? 'eye' : 'eye-off'}
+                    name={passwordToggle.visible ? 'eye' : 'eye-off'}
                     size={26}
                     color={colors.palette.neutral400}
                   />
@@ -119,7 +125,7 @@ export default function Password() {
 
             <Input
               placeholder="Confirm Password"
-              secureTextEntry={!showPassword}
+              secureTextEntry={!confirmPasswordToggle.visible}
               LeftAccessory={() => (
                 <Ionicons
                   name="lock-closed"
@@ -133,11 +139,11 @@ export default function Password() {
               )}
               RightAccessory={() => (
                 <TouchableOpacity
-                  onPress={toggleShowPassword}
+                  onPress={confirmPasswordToggle.toggleVisibility}
                   style={[styles.icon, { marginEnd: 12 }]}
                 >
                   <Ionicons
-                    name={showPassword ? 'eye' : 'eye-off'}
+                    name={confirmPasswordToggle.visible ? 'eye' : 'eye-off'}
                     size={26}
                     color={colors.palette.neutral400}
                   />
