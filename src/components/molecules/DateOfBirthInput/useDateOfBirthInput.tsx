@@ -44,8 +44,6 @@ const useDateOfBirthInput = (
 
   // Populate fields if value changes
   useEffect(() => {
-    console.log(prevValueRef);
-    console.log({ value });
     if (value instanceof Date && prevValueRef.current === value) {
       setDate({
         day: String(value.getDate()).padStart(2, '0'),

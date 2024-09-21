@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 12,
-    maxHeight: 54,
+    maxHeight: 60,
     backgroundColor: colors.palette.neutral200,
   },
   errorText: {

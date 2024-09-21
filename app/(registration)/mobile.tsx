@@ -3,31 +3,39 @@ import { Header, MobileNumberInputField } from '@/src/components/molecules';
 import { ICountryCode } from '@/src/config';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
+import { router } from 'expo-router';
 import { Formik } from 'formik';
 import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
 import * as Yup from 'yup';
+import { AsYouType } from 'libphonenumber-js';
+import 'yup-phone-lite';
 
 // Define the validation schema using Yup
-const mobileSchema = Yup.object().shape({
-  mobile: Yup.string()
-    .matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits')
-    .required('Mobile number is required'),
-});
+const mobileSchema = (countryCode: string) =>
+  Yup.object().shape({
+    mobile: Yup.string()
+      .phone(countryCode as any, 'Please enter a valid phone number')
+      .required('Mobile number is required'),
+  });
 
 export default function Mobile() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
   const mobileRef = useRef<TextInput>(null);
   const [show, setShow] = useState<boolean>(false);
-  const [countryCode, setCountryCode] = useState({ code: '+44', flag: '🇬🇧' });
+  const [countryCode, setCountryCode] = useState<ICountryCode>({
+    code: '+44',
+    flag: '🇬🇧',
+    country: 'GB',
+  });
 
   const handleSubmit = async (
     values: { mobile: string },
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     setFormData(values);
-    await handleSubmitStep(mobileSchema, ['mobile']);
+    await handleSubmitStep(mobileSchema(countryCode.country), ['mobile']);
     setSubmitting(false);
   };
 
@@ -41,6 +49,10 @@ export default function Mobile() {
     setShow(false);
   }, []);
 
+  const emailPressed = () => {
+    router.push('/(registration)/email');
+  };
+
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
@@ -48,8 +60,10 @@ export default function Mobile() {
         subtitle="Enter the mobile number on which you can be contacted. No one will see this on your profile."
       />
       <Formik
-        initialValues={{ mobile: state.formData.mobile || '' }}
-        validationSchema={mobileSchema}
+        initialValues={{
+          mobile: state.formData.mobile || '',
+        }}
+        validationSchema={mobileSchema(countryCode.country)}
         onSubmit={handleSubmit}
       >
         {({
@@ -68,11 +82,16 @@ export default function Mobile() {
               onCountryCodePress={handleCountryCodePress}
               value={values.mobile}
               onChangeText={(text) => {
-                handleChange('mobile')(text);
-                setFormData({ ...values, mobile: text });
+                const formattedNumber = new AsYouType(
+                  countryCode.country,
+                ).input(text);
+                handleChange('mobile')(formattedNumber);
+                setFormData({
+                  ...values,
+                  mobile: formattedNumber,
+                });
               }}
               containerStyle={{ flex: 1 }}
-              inputWrapperStyle={{ borderWidth: 0 }}
               onBlur={handleBlur('mobile')}
               ref={mobileRef}
               showError={!!errors.mobile && touched.mobile}
@@ -92,7 +111,11 @@ export default function Mobile() {
             >
               Continue
             </Button>
-            <Button preset="reversed" textStyle={{ fontWeight: '300' }}>
+            <Button
+              preset="default"
+              textStyle={{ fontWeight: '300' }}
+              onPress={emailPressed}
+            >
               {'Sign up with email'}
             </Button>
           </View>
@@ -124,12 +147,14 @@ export default function Mobile() {
           dialCode: {
             fontFamily: typography.primary.medium,
           },
-          // Country name styles [Text]
           countryName: { fontFamily: typography.primary.medium },
         }}
-        // when picker button press you will get the country object with dial code
         pickerButtonOnPress={(item) => {
-          handleCountrySelect({ code: item.dial_code, flag: item.flag });
+          handleCountrySelect({
+            code: item.dial_code,
+            flag: item.flag,
+            country: item.code,
+          });
           setShow(false);
         }}
       />

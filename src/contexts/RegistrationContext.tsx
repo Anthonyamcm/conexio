@@ -152,7 +152,6 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
         state.formData,
         fieldsToValidate,
       );
-      console.log(state.formData);
       if (Object.keys(errors).length === 0) {
         setErrors({});
         return true;

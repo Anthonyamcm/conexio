@@ -10,4 +10,5 @@ export interface IRegistrationData {
 export interface ICountryCode {
   code: string;
   flag: string;
+  country: string;
 }

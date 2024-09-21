@@ -154,7 +154,7 @@ const leftAccessoryStyle: ViewStyle = {
 const viewPresets = {
   default: [
     baseViewStyle,
-    { borderWidth: 0, backgroundColor: colors.palette.neutral300 },
+    { backgroundColor: colors.palette.neutral300 },
   ] as StyleProp<TextStyle>,
   filled: [
     baseViewStyle,
@@ -164,7 +164,6 @@ const viewPresets = {
     baseViewStyle,
     {
       backgroundColor: colors.transparent,
-      borderWidth: 3,
       borderColor: colors.palette.neutral300,
     },
   ] as StyleProp<TextStyle>,
@@ -181,7 +180,7 @@ const textPresets: Record<Presets, StyleProp<TextStyle>> = {
 const pressedViewPresets: Record<Presets, StyleProp<ViewStyle>> = {
   default: { backgroundColor: colors.palette.neutral200 },
   filled: { backgroundColor: colors.palette.neutral400 },
-  reversed: { backgroundColor: colors.palette.neutral700 },
+  reversed: { backgroundColor: colors.palette.neutral300 },
   gradient: { backgroundColor: colors.palette.neutral200 },
 };
 
