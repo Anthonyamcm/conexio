@@ -1,13 +1,12 @@
 import { Button, Footer, Input, Screen, Text } from '@/src/components/atoms';
-import { InputProps } from '@/src/components/atoms/Input';
-import { Header } from '@/src/components/molecules';
+import { Header, MobileNumberInputField } from '@/src/components/molecules';
+import { ICountryCode } from '@/src/config';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
 import { Formik } from 'formik';
-import { forwardRef, memo, useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import * as Yup from 'yup';
 
 // Define the validation schema using Yup
@@ -16,74 +15,6 @@ const mobileSchema = Yup.object().shape({
     .matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits')
     .required('Mobile number is required'),
 });
-
-interface CountryCode {
-  code: string;
-  flag: string;
-}
-
-interface CustomInputWithCountryCodeProps extends InputProps {
-  countryCode: CountryCode; // Change to an object if needed
-  onCountryCodePress: () => void;
-  showError: boolean | undefined;
-  errorText: string | undefined;
-}
-
-const CustomInputWithCountryCode = memo(
-  forwardRef<TextInput, CustomInputWithCountryCodeProps>(
-    (
-      { countryCode, onCountryCodePress, showError, errorText, ...inputProps },
-      ref,
-    ) => (
-      <View style={{ flexDirection: 'column' }}>
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              borderColor: showError
-                ? colors.palette.error100
-                : colors.palette.neutral200,
-              borderWidth: 3,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.countryCodeContainer}
-            onPress={onCountryCodePress}
-          >
-            <Text preset="bold" style={styles.countryCodeText}>
-              {countryCode.flag}
-            </Text>
-            <Text preset="bold" style={styles.countryCodeText}>
-              {countryCode.code}
-            </Text>
-          </TouchableOpacity>
-          <View
-            style={{
-              width: 3,
-              backgroundColor: colors.palette.neutral300,
-              borderRadius: 12,
-              paddingVertical: 15,
-            }}
-          />
-          <Input
-            ref={ref} // Pass ref to the Input component
-            placeholder="Mobile number"
-            keyboardType="number-pad"
-            {...inputProps} // Spread remaining props
-          />
-        </View>
-        {errorText && (
-          <Text
-            preset="bold"
-            style={{ color: colors.palette.error100, marginTop: spacing.xs }}
-            text={errorText}
-          />
-        )}
-      </View>
-    ),
-  ),
-);
 
 export default function Mobile() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
@@ -105,7 +36,7 @@ export default function Mobile() {
     setShow(true);
   }, []);
 
-  const handleCountrySelect = useCallback((country: CountryCode) => {
+  const handleCountrySelect = useCallback((country: ICountryCode) => {
     setCountryCode(country);
     setShow(false);
   }, []);
@@ -132,7 +63,7 @@ export default function Mobile() {
           isSubmitting,
         }) => (
           <View style={styles.formContainer}>
-            <CustomInputWithCountryCode
+            <MobileNumberInputField
               countryCode={countryCode}
               onCountryCodePress={handleCountryCodePress}
               value={values.mobile}
@@ -147,6 +78,7 @@ export default function Mobile() {
               showError={!!errors.mobile && touched.mobile}
               accessibilityLabel="Mobile number input"
               errorText={errors.mobile}
+              touched={touched as { mobile: boolean }}
             />
             <Button
               preset="gradient"
@@ -214,28 +146,5 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     gap: 15, // Use a space unit consistent with your design system if necessary
-  },
-  // TODO: Fix dimension so that its responsive
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 12,
-    maxHeight: 54,
-    backgroundColor: colors.palette.neutral200,
-  },
-  errorText: {
-    color: colors.palette.error100,
-    marginTop: 5,
-    fontWeight: '500',
-  },
-  countryCodeContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginStart: 12,
-  },
-  countryCodeText: {
-    textAlign: 'center',
-    fontSize: 16,
-    marginRight: 12,
   },
 });

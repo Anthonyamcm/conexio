@@ -6,3 +6,8 @@ export interface IRegistrationData {
   email?: string;
   password: string;
 }
+
+export interface ICountryCode {
+  code: string;
+  flag: string;
+}

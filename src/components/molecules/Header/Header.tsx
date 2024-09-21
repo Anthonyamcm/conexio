@@ -1,4 +1,4 @@
-import { Text, View } from '../atoms';
+import { Text, View } from '../../atoms';
 
 interface HeaderProps {
   title: string;

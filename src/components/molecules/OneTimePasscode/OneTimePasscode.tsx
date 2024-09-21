@@ -5,7 +5,7 @@ import {
   TextInputKeyPressEventData,
   View,
 } from 'react-native';
-import { Input } from '../atoms';
+import { Input } from '../../atoms';
 import { useEffect, useRef, useState } from 'react';
 
 export default function OneTimePasscode() {

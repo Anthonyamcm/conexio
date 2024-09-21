@@ -1,10 +1,10 @@
 import { View } from 'react-native';
-import { Input, Text } from '../atoms';
-import { forwardRef, useImperativeHandle, useRef, useCallback } from 'react';
+import { Input, Text } from '../../atoms';
+import { forwardRef, useImperativeHandle, useCallback } from 'react';
+import { colors, spacing } from '@/src/utlis';
 import useDateOfBirthInput, {
   DateOfBirthInputReturnType,
-} from '@/src/hooks/componentHooks/useDateOfBirthInput';
-import { colors, spacing } from '@/src/utlis';
+} from './useDateOfBirthInput';
 
 interface DateOfBirthInputProps {
   setFieldValue: (field: string, value: Date | null) => void;

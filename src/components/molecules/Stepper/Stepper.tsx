@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
-import { Step } from '../atoms';
+import { Step } from '../../atoms';
 import { spacing } from '@/src/utlis';
 import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
