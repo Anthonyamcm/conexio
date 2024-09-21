@@ -85,13 +85,8 @@ export default function Login() {
                 />
               )}
               error={touched.email && !!errors.email}
+              errorText={errors.email}
             />
-            {touched.email && errors.email && (
-              <Text preset="bold" style={styles.errorText}>
-                {errors.email}
-              </Text>
-            )}
-
             <Input
               placeholder="Password"
               value={values.password}
@@ -123,12 +118,8 @@ export default function Login() {
                 </TouchableOpacity>
               )}
               error={touched.password && !!errors.password}
+              errorText={errors.password}
             />
-            {touched.password && errors.password && (
-              <Text preset="bold" style={styles.errorText}>
-                {errors.password}
-              </Text>
-            )}
             <Button
               preset="gradient"
               gradient={[

@@ -26,6 +26,7 @@ export interface InputAccessoryProps {
 
 export interface InputProps extends Omit<TextInputProps, 'ref'> {
   error?: boolean;
+  errorText?: string;
   ref?: React.RefObject<TextInput>;
   label?: TextProps['text'];
   LabelTextProps?: TextProps;
@@ -45,6 +46,7 @@ const Input = forwardRef(function TextField(
     placeholder,
     helper,
     error = false,
+    errorText,
     RightAccessory,
     LeftAccessory,
     HelperTextProps,
@@ -163,6 +165,14 @@ const Input = forwardRef(function TextField(
           />
         )}
       </View>
+
+      {!!errorText && error && (
+        <Text
+          preset="bold"
+          style={{ color: colors.palette.error100, marginTop: spacing.xs }}
+          text={errorText}
+        />
+      )}
 
       {!!helper && (
         <Text

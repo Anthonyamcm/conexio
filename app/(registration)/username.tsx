@@ -170,12 +170,8 @@ export default function Username() {
               onBlur={handleBlur('username')}
               ref={usernameRef}
               error={!!errors.username && !isChecking}
+              errorText={errors.username}
             />
-            {errors.username && !isChecking && (
-              <Text weight="medium" style={styles.errorText}>
-                {errors.username}
-              </Text>
-            )}
 
             <Button
               preset="gradient"

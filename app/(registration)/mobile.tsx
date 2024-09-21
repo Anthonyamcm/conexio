@@ -26,47 +26,60 @@ interface CustomInputWithCountryCodeProps extends InputProps {
   countryCode: CountryCode; // Change to an object if needed
   onCountryCodePress: () => void;
   showError: boolean | undefined;
+  errorText: string | undefined;
 }
 
 const CustomInputWithCountryCode = memo(
   forwardRef<TextInput, CustomInputWithCountryCodeProps>(
-    ({ countryCode, onCountryCodePress, showError, ...inputProps }, ref) => (
-      <View
-        style={[
-          styles.inputContainer,
-          {
-            borderColor: showError
-              ? colors.palette.error100
-              : colors.palette.neutral200,
-            borderWidth: 3,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.countryCodeContainer}
-          onPress={onCountryCodePress}
-        >
-          <Text preset="bold" style={styles.countryCodeText}>
-            {countryCode.flag}
-          </Text>
-          <Text preset="bold" style={styles.countryCodeText}>
-            {countryCode.code}
-          </Text>
-        </TouchableOpacity>
+    (
+      { countryCode, onCountryCodePress, showError, errorText, ...inputProps },
+      ref,
+    ) => (
+      <View style={{ flexDirection: 'column' }}>
         <View
-          style={{
-            width: 3,
-            backgroundColor: colors.palette.neutral300,
-            borderRadius: 12,
-            paddingVertical: 15,
-          }}
-        />
-        <Input
-          ref={ref} // Pass ref to the Input component
-          placeholder="Mobile number"
-          keyboardType="number-pad"
-          {...inputProps} // Spread remaining props
-        />
+          style={[
+            styles.inputContainer,
+            {
+              borderColor: showError
+                ? colors.palette.error100
+                : colors.palette.neutral200,
+              borderWidth: 3,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.countryCodeContainer}
+            onPress={onCountryCodePress}
+          >
+            <Text preset="bold" style={styles.countryCodeText}>
+              {countryCode.flag}
+            </Text>
+            <Text preset="bold" style={styles.countryCodeText}>
+              {countryCode.code}
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              width: 3,
+              backgroundColor: colors.palette.neutral300,
+              borderRadius: 12,
+              paddingVertical: 15,
+            }}
+          />
+          <Input
+            ref={ref} // Pass ref to the Input component
+            placeholder="Mobile number"
+            keyboardType="number-pad"
+            {...inputProps} // Spread remaining props
+          />
+        </View>
+        {errorText && (
+          <Text
+            preset="bold"
+            style={{ color: colors.palette.error100, marginTop: spacing.xs }}
+            text={errorText}
+          />
+        )}
       </View>
     ),
   ),
@@ -133,12 +146,8 @@ export default function Mobile() {
               ref={mobileRef}
               showError={!!errors.mobile && touched.mobile}
               accessibilityLabel="Mobile number input"
+              errorText={errors.mobile}
             />
-            {errors.mobile && touched.mobile && (
-              <Text weight="medium" style={styles.errorText}>
-                {errors.mobile}
-              </Text>
-            )}
             <Button
               preset="gradient"
               gradient={[

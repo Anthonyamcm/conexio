@@ -72,12 +72,9 @@ export default function Name() {
               onBlur={handleBlur('name')}
               ref={nameRef}
               error={!!errors.name && touched.name}
+              errorText={errors.name}
             />
-            {errors.name && touched.name && (
-              <Text weight="medium" style={styles.errorText}>
-                {errors.name}
-              </Text>
-            )}
+
             <Button
               preset="gradient"
               gradient={[

@@ -118,10 +118,8 @@ export default function Password() {
               onBlur={handleBlur('password')}
               ref={passwordRef}
               error={!!errors.password && touched.password}
+              errorText={errors.password}
             />
-            {errors.password && touched.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
 
             <Input
               placeholder="Confirm Password"
@@ -158,10 +156,8 @@ export default function Password() {
               onBlur={handleBlur('confirmPassword')}
               ref={confirmPasswordRef}
               error={!!errors.confirmPassword && touched.confirmPassword}
+              errorText={errors.password}
             />
-            {errors.confirmPassword && touched.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-            )}
 
             {/* Submit Button */}
             <Button

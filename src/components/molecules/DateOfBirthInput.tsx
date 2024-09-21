@@ -1,9 +1,10 @@
-import { Text, View } from 'react-native';
-import { Input } from '../atoms';
+import { View } from 'react-native';
+import { Input, Text } from '../atoms';
 import { forwardRef, useImperativeHandle, useRef, useCallback } from 'react';
 import useDateOfBirthInput, {
   DateOfBirthInputReturnType,
 } from '@/src/hooks/componentHooks/useDateOfBirthInput';
+import { colors, spacing } from '@/src/utlis';
 
 interface DateOfBirthInputProps {
   setFieldValue: (field: string, value: Date | null) => void;
@@ -49,7 +50,7 @@ const DateOfBirthInput = forwardRef<
   }, [setFieldTouched]);
 
   return (
-    <>
+    <View style={{ flexDirection: 'column' }}>
       <View style={{ flexDirection: 'row', gap: 15, alignItems: 'flex-start' }}>
         <Input
           placeholder="DD"
@@ -92,9 +93,13 @@ const DateOfBirthInput = forwardRef<
         />
       </View>
       {touched.dob && error && isComplete && (
-        <Text style={{ color: 'red', marginTop: 5 }}>{error}</Text>
+        <Text
+          preset="bold"
+          style={{ color: colors.palette.error100, marginTop: spacing.xs }}
+          text={error}
+        />
       )}
-    </>
+    </View>
   );
 });
 
