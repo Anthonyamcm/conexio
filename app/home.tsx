@@ -10,7 +10,7 @@ export default function Home() {
   };
 
   const loginPressed = () => {
-    router.push('/login');
+    router.push('/(login)/login');
   };
 
   return (
@@ -29,7 +29,7 @@ export default function Home() {
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
           onPress={loginPressed}
         >
-          {'Log in'}
+          {'Sign in'}
         </Button>
         <Button preset={'default'} onPress={registerPressed}>
           {'Create account'}

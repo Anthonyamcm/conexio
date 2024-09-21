@@ -27,6 +27,8 @@ const palette = {
   error200: '#C11C32',
   error300: '#D12F4A',
 
+  success100: '#a8e063',
+
   overlay20: 'rgba(25, 16, 21, 0.2)',
   overlay50: 'rgba(25, 16, 21, 0.5)',
 } as const;

@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect, useMemo } from 'react';
 import { Button, Footer, Input, Screen, Text } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
@@ -20,8 +20,6 @@ const checkUsernameAvailability = async (username: string) => {
 // Yup schema with async validation for username
 const usernameSchema = Yup.object().shape({
   username: Yup.string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(32, 'Username must be less than 32 characters')
     .required('Username is required')
     .test(
       'checkUsernameAvailable',
@@ -38,34 +36,24 @@ const usernameSchema = Yup.object().shape({
 export default function Username() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
   const [isChecking, setIsChecking] = useState<boolean>(false);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const usernameRef = useRef<TextInput>(null);
-
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (
-      value: { username: string },
-      { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-    ) => {
-      if (!(await checkUsernameAvailability(value.username))) {
-        setSubmitting(false);
-        return;
-      }
-      setFormData(value);
-      await handleSubmitStep(usernameSchema, ['username']);
-      setSubmitting(false);
-    },
-    [setFormData, handleSubmitStep],
-  );
 
   // Debounced username availability check
   const handleCheckUsernameAvailability = useRef(
     _.debounce(async (username: string) => {
-      if (!username) return;
+      if (!username) {
+        setIsAvailable(false);
+        return;
+      }
       setIsChecking(true);
       try {
         const isAvailable = await checkUsernameAvailability(username);
         if (isAvailable) {
           setFormData({ username });
+          setIsAvailable(true);
+        } else {
+          setIsAvailable(false);
         }
       } catch (error) {
         console.error('Error checking username availability:', error);
@@ -75,6 +63,31 @@ export default function Username() {
     }, 1000),
   ).current;
 
+  useEffect(() => {
+    return () => {
+      handleCheckUsernameAvailability.cancel();
+    };
+  }, [handleCheckUsernameAvailability]);
+
+  // Handle form submission
+  const handleSubmit = useCallback(
+    async (
+      value: { username: string },
+      { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+    ) => {
+      if (!(await checkUsernameAvailability(value.username))) {
+        setSubmitting(false);
+        setIsAvailable(false);
+        return;
+      }
+      setIsAvailable(true);
+      setFormData(value);
+      await handleSubmitStep(usernameSchema, ['username']);
+      setSubmitting(false);
+    },
+    [setFormData, handleSubmitStep],
+  );
+
   // Icon color based on validation error
   const iconColor = useCallback(
     (error: string | undefined, isChecking: boolean) =>
@@ -83,6 +96,39 @@ export default function Username() {
         : colors.palette.neutral400,
     [],
   );
+
+  const RightAccessory = useMemo(() => {
+    if (isChecking) {
+      return (
+        <ActivityIndicator
+          size="small"
+          color={colors.palette.neutral500}
+          style={[styles.icon, { marginEnd: 12 }]}
+        />
+      );
+    }
+    if (isAvailable === true) {
+      return (
+        <MaterialIcons
+          name="check-circle"
+          size={26}
+          color={colors.palette.success100}
+          style={[styles.icon, { marginEnd: 12 }]}
+        />
+      );
+    }
+    if (isAvailable === false) {
+      return (
+        <MaterialIcons
+          name="cancel"
+          size={26}
+          color={colors.palette.error100}
+          style={[styles.icon, { marginEnd: 12 }]}
+        />
+      );
+    }
+    return null;
+  }, [isChecking, isAvailable]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -115,15 +161,7 @@ export default function Username() {
                   style={styles.icon}
                 />
               )}
-              RightAccessory={() =>
-                isChecking ? (
-                  <ActivityIndicator
-                    size="small"
-                    color={colors.palette.neutral500}
-                    style={[styles.icon, { marginEnd: 12 }]}
-                  />
-                ) : null
-              }
+              RightAccessory={() => RightAccessory}
               value={values.username}
               onChangeText={(text) => {
                 handleChange('username')(text);
