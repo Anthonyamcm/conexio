@@ -156,7 +156,7 @@ export default function Password() {
               onBlur={handleBlur('confirmPassword')}
               ref={confirmPasswordRef}
               error={!!errors.confirmPassword && touched.confirmPassword}
-              errorText={errors.password}
+              errorText={errors.confirmPassword}
             />
 
             {/* Submit Button */}
