@@ -15,6 +15,7 @@ interface FormData {
   dob: Date | null;
   email?: string;
   mobile?: string;
+  otp?: string;
   password: string;
   confirmPassword: string;
   username: string;
@@ -34,6 +35,7 @@ const initialState: RegistrationState = {
     dob: null,
     email: '',
     mobile: '',
+    otp: '',
     password: '',
     confirmPassword: '',
     username: '',

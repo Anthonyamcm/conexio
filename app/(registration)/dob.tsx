@@ -3,6 +3,7 @@ import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
 import { Formik } from 'formik';
+import { useCallback } from 'react';
 import * as yup from 'yup';
 
 const dobSchema = yup.object().shape({
@@ -45,16 +46,17 @@ const dobSchema = yup.object().shape({
 export default function Dob() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
 
-  const handleSubmit = async (
-    values: { dob: Date | null },
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-  ) => {
-    setFormData(values);
-
-    await handleSubmitStep(dobSchema, ['dob']);
-
-    setSubmitting(false);
-  };
+  const handleSubmit = useCallback(
+    async (
+      values: { dob: Date | null },
+      { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
+    ) => {
+      setFormData(values);
+      await handleSubmitStep(dobSchema, ['dob']);
+      setSubmitting(false);
+    },
+    [setFormData, handleSubmitStep],
+  );
 
   return (
     <Screen
@@ -69,7 +71,7 @@ export default function Dob() {
         subtitle={`Enter your date of birth (you must be 16+). This won't appear on your profile.`}
       />
       <Formik
-        initialValues={state.formData}
+        initialValues={{ dob: state.formData.dob || null }}
         validationSchema={dobSchema}
         onSubmit={handleSubmit}
       >

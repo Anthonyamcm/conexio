@@ -1,16 +1,16 @@
-import { Button, Footer, Input, Screen, Text } from '@/src/components/atoms';
+import React, { useCallback, useRef, useState } from 'react';
+import { StyleSheet, TextInput, View } from 'react-native';
+import { Formik, FormikHelpers } from 'formik';
+import * as Yup from 'yup';
+import { AsYouType } from 'libphonenumber-js';
+import 'yup-phone-lite';
+import { Button, Footer, Screen } from '@/src/components/atoms';
 import { Header, MobileNumberInputField } from '@/src/components/molecules';
 import { ICountryCode } from '@/src/config';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
 import { router } from 'expo-router';
-import { Formik } from 'formik';
-import { useCallback, useRef, useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
 import { CountryPicker } from 'react-native-country-codes-picker';
-import * as Yup from 'yup';
-import { AsYouType } from 'libphonenumber-js';
-import 'yup-phone-lite';
 
 // Define the validation schema using Yup
 const mobileSchema = (countryCode: string) =>
@@ -19,6 +19,11 @@ const mobileSchema = (countryCode: string) =>
       .phone(countryCode as any, 'Please enter a valid phone number')
       .required('Mobile number is required'),
   });
+
+// Define types for Formik values and submit function
+interface FormValues {
+  mobile: string;
+}
 
 export default function Mobile() {
   const { state, setFormData, handleSubmitStep } = useRegistration();
@@ -30,14 +35,18 @@ export default function Mobile() {
     country: 'GB',
   });
 
-  const handleSubmit = async (
-    values: { mobile: string },
-    { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-  ) => {
-    setFormData(values);
-    await handleSubmitStep(mobileSchema(countryCode.country), ['mobile']);
-    setSubmitting(false);
-  };
+  const handleSubmit = useCallback(
+    async (
+      values: FormValues,
+      { setSubmitting }: FormikHelpers<FormValues>,
+    ) => {
+      console.log({ values });
+      setFormData(values);
+      await handleSubmitStep(mobileSchema(countryCode.country), ['mobile']);
+      setSubmitting(false);
+    },
+    [countryCode, setFormData, handleSubmitStep],
+  );
 
   const handleCountryCodePress = useCallback(() => {
     mobileRef.current?.blur();
@@ -49,9 +58,19 @@ export default function Mobile() {
     setShow(false);
   }, []);
 
-  const emailPressed = () => {
+  const formatPhoneNumber = useCallback(
+    (value: string) => {
+      if (value.includes('(') && !value.includes(')')) {
+        return value.replace('(', '');
+      }
+      return new AsYouType(countryCode.country).input(value);
+    },
+    [countryCode],
+  );
+
+  const emailPressed = useCallback(() => {
     router.push('/(registration)/email');
-  };
+  }, []);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -60,9 +79,7 @@ export default function Mobile() {
         subtitle="Enter the mobile number on which you can be contacted. No one will see this on your profile."
       />
       <Formik
-        initialValues={{
-          mobile: state.formData.mobile || '',
-        }}
+        initialValues={{ mobile: state.formData.mobile || '' }}
         validationSchema={mobileSchema(countryCode.country)}
         onSubmit={handleSubmit}
       >
@@ -82,9 +99,7 @@ export default function Mobile() {
               onCountryCodePress={handleCountryCodePress}
               value={values.mobile}
               onChangeText={(text) => {
-                const formattedNumber = new AsYouType(
-                  countryCode.country,
-                ).input(text);
+                const formattedNumber = formatPhoneNumber(text);
                 handleChange('mobile')(formattedNumber);
                 setFormData({
                   ...values,
@@ -106,7 +121,7 @@ export default function Mobile() {
                 colors.palette.secondary100,
               ]}
               onPress={() => handleSubmit()}
-              disabled={!isValid}
+              disabled={!isValid || isSubmitting}
               isLoading={isSubmitting}
             >
               Continue
@@ -116,39 +131,17 @@ export default function Mobile() {
               textStyle={{ fontWeight: '300' }}
               onPress={emailPressed}
             >
-              {'Sign up with email'}
+              Sign up with email
             </Button>
           </View>
         )}
       </Formik>
       <Footer />
       <CountryPicker
-        lang={'en'}
+        lang="en"
         show={show}
         onBackdropPress={() => setShow(false)}
-        style={{
-          modal: {
-            height: 700,
-          },
-          line: {
-            opacity: 0,
-          },
-          textInput: {
-            padding: spacing.md,
-            height: 52,
-            backgroundColor: colors.palette.neutral200,
-            fontFamily: typography.primary.medium,
-          },
-          countryButtonStyles: {
-            height: 52,
-            backgroundColor: colors.palette.neutral200,
-            marginBottom: spacing.xs,
-          },
-          dialCode: {
-            fontFamily: typography.primary.medium,
-          },
-          countryName: { fontFamily: typography.primary.medium },
-        }}
+        style={countryPickerStyles}
         pickerButtonOnPress={(item) => {
           handleCountrySelect({
             code: item.dial_code,
@@ -170,6 +163,30 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     flexDirection: 'column',
-    gap: 15, // Use a space unit consistent with your design system if necessary
+    gap: 15,
   },
+});
+
+const countryPickerStyles = StyleSheet.create({
+  modal: {
+    height: 700,
+  },
+  line: {
+    opacity: 0,
+  },
+  textInput: {
+    padding: spacing.md,
+    height: 52,
+    backgroundColor: colors.palette.neutral200,
+    fontFamily: typography.primary.medium,
+  },
+  countryButtonStyles: {
+    height: 52,
+    backgroundColor: colors.palette.neutral200,
+    marginBottom: spacing.xs,
+  },
+  dialCode: {
+    fontFamily: typography.primary.medium,
+  },
+  countryName: { fontFamily: typography.primary.medium },
 });

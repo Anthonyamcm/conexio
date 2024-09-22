@@ -36,11 +36,11 @@ export default function Password() {
   const confirmPasswordRef = useRef<TextInput>(null);
 
   const handleSubmit = async (
-    values: { password: string; confirmPassword: string },
+    values: { password: string },
     { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
   ) => {
     setFormData(values);
-    await handleSubmitStep(passwordSchema, ['password', 'confirmPassword']);
+    await handleSubmitStep(passwordSchema, ['password']);
     setSubmitting(false);
   };
 

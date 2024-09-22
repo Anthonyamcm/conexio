@@ -36,23 +36,14 @@ const useDateOfBirthInput = (
   const dayInputRef = useRef<TextInput | null>(null);
   const monthInputRef = useRef<TextInput | null>(null);
   const yearInputRef = useRef<TextInput | null>(null);
-  const prevValueRef = useRef(value);
-  const [date, setDate] = useState<DobDate>({ day: '', month: '', year: '' });
+  const [date, setDate] = useState<DobDate>({
+    day: value ? String(value.getDate()).padStart(2, '0') : '',
+    month: value ? String(value.getMonth() + 1).padStart(2, '0') : '',
+    year: value ? String(value.getFullYear()) : '',
+  });
 
   const isComplete =
     date.day.length === 2 && date.month.length === 2 && date.year.length === 4;
-
-  // Populate fields if value changes
-  useEffect(() => {
-    if (value instanceof Date && prevValueRef.current === value) {
-      setDate({
-        day: String(value.getDate()).padStart(2, '0'),
-        month: String(value.getMonth() + 1).padStart(2, '0'),
-        year: String(value.getFullYear()),
-      });
-    }
-    prevValueRef.current = value; // Update the ref to the latest value
-  }, [value]);
 
   // Consolidate the main logic into one useEffect
   useEffect(() => {

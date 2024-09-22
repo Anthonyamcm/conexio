@@ -1,3 +1,5 @@
+import { CountryCode } from 'libphonenumber-js/types';
+
 export interface IRegistrationData {
   name: string;
   username: string;
@@ -10,5 +12,5 @@ export interface IRegistrationData {
 export interface ICountryCode {
   code: string;
   flag: string;
-  country: string;
+  country: CountryCode;
 }
