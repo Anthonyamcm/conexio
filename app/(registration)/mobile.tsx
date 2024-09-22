@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { AsYouType } from 'libphonenumber-js';
+import { AsYouType, parsePhoneNumber } from 'libphonenumber-js';
 import 'yup-phone-lite';
 import { Button, Footer, Screen } from '@/src/components/atoms';
 import { Header, MobileNumberInputField } from '@/src/components/molecules';
@@ -11,6 +11,7 @@ import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utlis';
 import { router } from 'expo-router';
 import { CountryPicker } from 'react-native-country-codes-picker';
+import { CountryCode } from 'libphonenumber-js/types';
 
 // Define the validation schema using Yup
 const mobileSchema = (countryCode: string) =>
@@ -40,8 +41,8 @@ export default function Mobile() {
       values: FormValues,
       { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
-      console.log({ values });
-      setFormData(values);
+      const phoneNumber = parsePhoneNumber(countryCode.code + values.mobile);
+      setFormData({ ...values, mobile: phoneNumber.number });
       await handleSubmitStep(mobileSchema(countryCode.country), ['mobile']);
       setSubmitting(false);
     },
@@ -146,7 +147,7 @@ export default function Mobile() {
           handleCountrySelect({
             code: item.dial_code,
             flag: item.flag,
-            country: item.code,
+            country: item.code as CountryCode,
           });
           setShow(false);
         }}
