@@ -47,7 +47,7 @@ export default function Otp() {
     >
       <Header
         title={`Enter the confirmation code`}
-        subtitle={`To confirm your account, enter the 6-digit code that we sent to ${state.formData.mobile}`}
+        subtitle={`To confirm your account, enter the 6-digit code that we sent to ${state.formData.mobile ? state.formData.mobile : state.formData.email}`}
       />
       <Formik
         initialValues={{ otp: state.formData.otp || '' }}

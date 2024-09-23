@@ -24,28 +24,6 @@ export default function Login() {
     console.log('submit');
   };
 
-  const showAlert = () => {
-    Alert.alert(
-      `Don't have an account?`,
-      '',
-      [
-        {
-          text: `Sign in`,
-          onPress: () => {
-            console.log('here');
-          },
-        },
-        {
-          text: 'Create account',
-          onPress: () => {
-            router.back();
-          },
-          style: 'cancel',
-        },
-      ],
-      { cancelable: false }, // Prevents dismissing the alert by tapping outside
-    );
-  };
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
@@ -137,19 +115,6 @@ export default function Login() {
           </View>
         )}
       </Formik>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignContent: 'center',
-        }}
-      >
-        <TouchableOpacity onPress={() => showAlert()}>
-          <Text weight="medium" size="xs">
-            {`Don't have an account?`}
-          </Text>
-        </TouchableOpacity>
-      </View>
     </Screen>
   );
 }
