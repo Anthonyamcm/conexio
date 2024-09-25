@@ -18,7 +18,7 @@ export default function Step({ index }: StepProps) {
       maxHeight: 25,
       paddingHorizontal: spacing.md,
       paddingVertical: spacing.xs,
-      borderRadius: 16,
+      borderRadius: 6,
     }),
     [],
   );

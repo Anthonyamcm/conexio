@@ -7,40 +7,23 @@ import { useCallback } from 'react';
 import * as yup from 'yup';
 
 const dobSchema = yup.object().shape({
-  dob: yup
-    .date()
-    .required('Date of birth is required')
-    .test('is-at-least-16', 'You must be at least 16 years old', (value) => {
-      if (!value) return false;
-
-      const today = new Date();
-      const minAgeDate = new Date(
-        today.getFullYear() - 16,
-        today.getMonth(),
-        today.getDate(),
-      );
-
-      // Check if the date makes the user at least 16 years old
-      return value <= minAgeDate;
-    })
-    .test('is-valid-date', 'Invalid date', (value) => {
-      if (!value) return false;
-
-      const today = new Date();
-      const minDate = new Date(
-        today.getFullYear() - 100,
-        today.getMonth(),
-        today.getDate(),
-      );
-      const maxDate = new Date(
-        today.getFullYear() - 16,
-        today.getMonth(),
-        today.getDate(),
-      );
-
-      // Ensure the date is within the realistic range
-      return value <= maxDate && value >= minDate;
-    }),
+  dob: yup.object().shape({
+    day: yup
+      .number()
+      .required('Day is required')
+      .min(1, 'Invalid day')
+      .max(31, 'Invalid day'),
+    month: yup
+      .number()
+      .required('Month is required')
+      .min(1, 'Invalid month')
+      .max(12, 'Invalid month'),
+    year: yup
+      .number()
+      .required('Year is required')
+      .min(1900, 'Year is too early')
+      .max(new Date().getFullYear(), 'Year is too far in the future'),
+  }),
 });
 
 export default function Dob() {
@@ -48,10 +31,12 @@ export default function Dob() {
 
   const handleSubmit = useCallback(
     async (
-      values: { dob: Date | null },
+      values: { dob: { day: string; month: string; year: string } },
       { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
     ) => {
-      setFormData(values);
+      const dateString = `${values.dob.year}-${values.dob.month}-${values.dob.day}`;
+      const parsedDate = new Date(dateString);
+      setFormData({ dob: parsedDate });
       await handleSubmitStep(dobSchema, ['dob']);
       setSubmitting(false);
     },
@@ -71,7 +56,9 @@ export default function Dob() {
         subtitle={`Enter your date of birth (you must be 16+). This won't appear on your profile.`}
       />
       <Formik
-        initialValues={{ dob: state.formData.dob || null }}
+        initialValues={{
+          dob: { day: '', month: '', year: '' },
+        }}
         validationSchema={dobSchema}
         onSubmit={handleSubmit}
       >
@@ -83,14 +70,24 @@ export default function Dob() {
           isValid,
           setFieldValue,
           setFieldTouched,
+          setFieldError,
         }) => (
           <View preset={'column'} style={{ flex: 1 }}>
             <DateOfBirthInput
               value={values.dob}
               setFieldValue={setFieldValue}
               setFieldTouched={setFieldTouched}
-              touched={touched as { dob: boolean }}
-              error={errors.dob as string}
+              setFieldError={setFieldError}
+              touched={{
+                day: touched.dob?.day || false,
+                month: touched.dob?.month || false,
+                year: touched.dob?.year || false,
+              }}
+              errors={{
+                day: errors.dob?.day,
+                month: errors.dob?.month,
+                year: errors.dob?.year,
+              }}
             />
             <Button
               preset={'gradient'}

@@ -1,17 +1,19 @@
-import { TextInput, View } from 'react-native';
+import { View } from 'react-native';
 import { Input, Text } from '../../atoms';
 import { forwardRef, useImperativeHandle, useCallback, RefObject } from 'react';
 import { colors, spacing } from '@/src/utlis';
 import useDateOfBirthInput, {
   DateOfBirthInputReturnType,
 } from './useDateOfBirthInput';
+import { DateField } from '@/src/config';
 
 interface DateOfBirthInputProps {
-  setFieldValue: (field: string, value: Date | null) => void;
+  setFieldValue: (field: string, value: string | Date) => void; // Change value type to string
   setFieldTouched: (field: string, isTouched: boolean) => void;
-  touched: { dob?: boolean };
-  error?: string;
-  value: Date | null;
+  setFieldError: (field: string, message: string | undefined) => void;
+  touched: { day: boolean; month: boolean; year: boolean }; // Touch states for each field
+  errors: { day?: string; month?: string; year?: string }; // Error messages for each field
+  value: { day: string; month: string; year: string }; // Update value to an object with day, month, year
   dateFormat?: 'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD'; // Define valid date formats
 }
 
@@ -28,7 +30,7 @@ const DateOfBirthInput = forwardRef<
       setFieldValue,
       setFieldTouched,
       touched,
-      error,
+      errors,
       value,
       dateFormat = 'DD/MM/YYYY',
     },
@@ -46,25 +48,18 @@ const DateOfBirthInput = forwardRef<
       formatMap,
     }: DateOfBirthInputReturnType = useDateOfBirthInput(
       setFieldValue,
-      value,
       dateFormat,
     );
 
-    // Imperative handle for external components to reset input
-    useImperativeHandle(ref, () => ({
-      reset() {
-        resetFields();
-        setFieldValue('dob', null);
-        dayInputRef.current?.focus();
-      },
-    }));
-
     // Memoized blur handler
-    const handleBlur = useCallback(() => {
-      setFieldTouched('dob', true);
-    }, [setFieldTouched]);
+    const handleBlur = useCallback(
+      (field: DateField) => {
+        setFieldTouched(`dob.${field}`, true);
+      },
+      [setFieldTouched],
+    );
 
-    const fieldRenderers: Record<'day' | 'month' | 'year', JSX.Element> = {
+    const fieldRenderers: Record<DateField, JSX.Element> = {
       day: (
         <Input
           key={'Day'}
@@ -76,9 +71,9 @@ const DateOfBirthInput = forwardRef<
           ref={dayInputRef}
           onChangeText={(text) => handleChange('day', text)}
           onKeyPress={(e) => handleKeyPress(e, 'day')}
-          onBlur={handleBlur}
+          onBlur={() => handleBlur('day')}
           value={date.day}
-          error={!!error && touched.dob}
+          error={touched.day && !!errors.day}
         />
       ),
       month: (
@@ -92,9 +87,9 @@ const DateOfBirthInput = forwardRef<
           ref={monthInputRef}
           onChangeText={(text) => handleChange('month', text)}
           onKeyPress={(e) => handleKeyPress(e, 'month')}
-          onBlur={handleBlur}
+          onBlur={() => handleBlur('month')}
           value={date.month}
-          error={!!error && touched.dob}
+          error={touched.month && !!errors.month}
         />
       ),
       year: (
@@ -108,9 +103,9 @@ const DateOfBirthInput = forwardRef<
           ref={yearInputRef}
           onChangeText={(text) => handleChange('year', text)}
           onKeyPress={(e) => handleKeyPress(e, 'year')}
-          onBlur={handleBlur}
+          onBlur={() => handleBlur('year')}
           value={date.year}
-          error={!!error && touched.dob}
+          error={touched.year && !!errors.year}
         />
       ),
     };
@@ -125,12 +120,20 @@ const DateOfBirthInput = forwardRef<
         >
           {inputs}
         </View>
-        {touched.dob && error && isComplete && (
-          <Text
-            preset="bold"
-            style={{ color: colors.palette.error100, marginTop: spacing.xs }}
-            text={error}
-          />
+        {(['day', 'month', 'year'] as DateField[]).map(
+          (field) =>
+            touched[field] &&
+            errors?.[field] && (
+              <Text
+                key={field}
+                preset="bold"
+                style={{
+                  color: colors.palette.error100,
+                  marginTop: spacing.xs,
+                }}
+                text={errors[field]} // Use dynamic key for error message
+              />
+            ),
         )}
       </View>
     );
