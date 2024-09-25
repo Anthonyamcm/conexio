@@ -17,34 +17,53 @@ type DobDate = {
 export interface DateOfBirthInputReturnType {
   date: DobDate;
   isComplete: boolean;
-  handleDayChange: (text: string) => void;
-  handleMonthChange: (text: string) => void;
-  handleYearChange: (text: string) => void;
+  handleChange: (field: 'day' | 'month' | 'year', text: string) => void;
   handleKeyPress: (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-    text: string,
-    prevRef?: RefObject<TextInput>,
+    field: 'day' | 'month' | 'year',
   ) => void;
   resetFields: () => void;
-  dayInputRef: React.RefObject<TextInput>;
-  monthInputRef: React.RefObject<TextInput>;
-  yearInputRef: React.RefObject<TextInput>;
+  dayInputRef: RefObject<TextInput>;
+  monthInputRef: RefObject<TextInput>;
+  yearInputRef: RefObject<TextInput>;
+  formatMap: Record<
+    'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD',
+    Array<'day' | 'month' | 'year'>
+  >;
 }
 
 const useDateOfBirthInput = (
-  setFieldValue: (field: string, value: Date) => void,
-  value: Date | null,
+  setFieldValue: (field: string, value: Date | null) => void,
+  initialDate: Date | null,
+  dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY/MM/DD', // Default to a specific format
 ): DateOfBirthInputReturnType => {
-  // Refs for the input fields
-  const dayInputRef = useRef<TextInput | null>(null);
-  const monthInputRef = useRef<TextInput | null>(null);
-  const yearInputRef = useRef<TextInput | null>(null);
+  const dayInputRef = useRef<TextInput>(null);
+  const monthInputRef = useRef<TextInput>(null);
+  const yearInputRef = useRef<TextInput>(null);
+
+  const fieldRefs = {
+    day: dayInputRef,
+    month: monthInputRef,
+    year: yearInputRef,
+  };
+
+  // Define order of inputs based on date format
+  const formatMap: Record<
+    'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD',
+    Array<'day' | 'month' | 'year'>
+  > = {
+    'MM/DD/YYYY': ['month', 'day', 'year'],
+    'DD/MM/YYYY': ['day', 'month', 'year'],
+    'YYYY/MM/DD': ['year', 'month', 'day'],
+  };
 
   // State to manage the date input values
   const [date, setDate] = useState<DobDate>({
-    day: value ? String(value.getDate()).padStart(2, '0') : '',
-    month: value ? String(value.getMonth() + 1).padStart(2, '0') : '',
-    year: value ? String(value.getFullYear()) : '',
+    day: initialDate ? String(initialDate.getDate()).padStart(2, '0') : '',
+    month: initialDate
+      ? String(initialDate.getMonth() + 1).padStart(2, '0')
+      : '',
+    year: initialDate ? String(initialDate.getFullYear()) : '',
   });
 
   // Derived state to check if all fields are filled
@@ -58,80 +77,74 @@ const useDateOfBirthInput = (
       const dateString = `${year}-${month}-${day}`;
       const parsedDate = new Date(dateString);
 
-      // Check if the parsed date is valid
       if (!isNaN(parsedDate.getTime())) {
         setFieldValue('dob', parsedDate);
-        Keyboard.dismiss(); // Dismiss the keyboard after a valid date is entered
+        Keyboard.dismiss();
       } else {
-        // Handle invalid date gracefully (e.g., show an error message)
         console.error('Invalid date:', dateString);
       }
     }
   }, [isComplete, date, setFieldValue]);
 
-  // Function to handle input changes and focus on the next field if needed
-  const handleInputChange = useCallback(
-    (
-      text: string,
-      nextRef?: RefObject<TextInput>,
-      prevRef?: RefObject<TextInput>,
-    ) => {
-      // If the input is empty and there's a previous field, focus on it
-      if (text.length === 0 && prevRef?.current) {
-        prevRef.current.focus();
-      }
-      // If the input has reached its max length and there's a next field, focus on it
-      else if (text.length === 2 && nextRef?.current) {
-        nextRef.current.focus();
+  // Helper function to get next and previous field refs based on date format
+  const getFieldIndex = (field: 'day' | 'month' | 'year') => {
+    return formatMap[dateFormat].indexOf(field);
+  };
+
+  const getNextFieldRef = (
+    currentField: 'day' | 'month' | 'year',
+  ): RefObject<TextInput> | undefined => {
+    const currentIndex = getFieldIndex(currentField);
+    const nextField =
+      currentIndex < 2 ? Object.keys(fieldRefs)[currentIndex + 1] : undefined;
+    return nextField
+      ? fieldRefs[nextField as keyof typeof fieldRefs]
+      : undefined;
+  };
+
+  const getPrevFieldRef = (
+    currentField: 'day' | 'month' | 'year',
+  ): RefObject<TextInput> | undefined => {
+    const currentIndex = getFieldIndex(currentField);
+    const prevField =
+      currentIndex > 0 ? Object.keys(fieldRefs)[currentIndex - 1] : undefined;
+    return prevField
+      ? fieldRefs[prevField as keyof typeof fieldRefs]
+      : undefined;
+  };
+
+  // Function to handle input changes and focus on the next or previous field if needed
+  const handleChange = useCallback(
+    (field: 'day' | 'month' | 'year', text: string) => {
+      setDate((prev) => ({ ...prev, [field]: text }));
+
+      // Determine the next and previous field references based on the current field
+      const nextFieldRef = getNextFieldRef(field);
+      const prevFieldRef = getPrevFieldRef(field);
+
+      // Focus logic
+      if (text.length === 2 && nextFieldRef?.current) {
+        nextFieldRef.current.focus();
+      } else if (text.length === 0 && prevFieldRef?.current) {
+        prevFieldRef.current.focus();
       }
     },
-    [],
+    [getNextFieldRef, getPrevFieldRef],
   );
 
-  // Function to handle key presses, specifically for backspace to move to the previous field
+  // Function to handle key presses, specifically for backspace
   const handleKeyPress = useCallback(
     (
       e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-      text: string,
-      prevRef?: RefObject<TextInput>,
+      field: 'day' | 'month' | 'year',
     ) => {
-      if (
-        e.nativeEvent.key === 'Backspace' &&
-        text.length === 0 &&
-        prevRef?.current
-      ) {
-        prevRef.current.focus();
+      if (e.nativeEvent.key === 'Backspace') {
+        handleChange(field, ''); // Clear the current field and focus on the previous
       }
     },
-    [],
+    [handleChange],
   );
 
-  // Handlers for each input field's change events
-  const handleDayChange = useCallback(
-    (text: string) => {
-      setDate((prev) => ({ ...prev, day: text }));
-      handleInputChange(text, monthInputRef);
-    },
-    [handleInputChange],
-  );
-
-  const handleMonthChange = useCallback(
-    (text: string) => {
-      setDate((prev) => ({ ...prev, month: text }));
-      handleInputChange(text, yearInputRef, dayInputRef);
-    },
-    [handleInputChange],
-  );
-
-  const handleYearChange = useCallback(
-    (text: string) => {
-      setDate((prev) => ({ ...prev, year: text }));
-      handleInputChange(text, undefined, monthInputRef);
-    },
-    [handleInputChange],
-  );
-
-  // Function to reset all input fields
   const resetFields = useCallback(() => {
     setDate({ day: '', month: '', year: '' });
     dayInputRef.current?.clear();
@@ -141,15 +154,14 @@ const useDateOfBirthInput = (
 
   return {
     date,
-    handleDayChange,
-    handleMonthChange,
-    handleYearChange,
+    isComplete,
+    handleChange,
     handleKeyPress,
     resetFields,
-    isComplete,
     dayInputRef,
     monthInputRef,
     yearInputRef,
+    formatMap,
   };
 };
 
