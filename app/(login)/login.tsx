@@ -107,7 +107,7 @@ export default function Login() {
               onPress={() => handleSubmit()}
               disabled={!isValid}
             >
-              Log in
+              Sign in
             </Button>
             <TouchableOpacity style={{ alignSelf: 'center' }}>
               <Text preset="bold">{'Forgotten Password?'}</Text>
