@@ -112,8 +112,7 @@ const useDateOfBirthInput = (
     (field: DateField, text: string) => {
       setDate((prev) => {
         const newDate = { ...prev, [field]: text };
-        console.log({ field });
-        setFieldValue(field, text); // Update the Formik field with the new date object
+        setFieldValue(`dob.${field}`, text); // Update the Formik field with the new date object
         return newDate;
       });
 

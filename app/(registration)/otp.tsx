@@ -63,7 +63,7 @@ export default function Otp() {
           setFieldValue,
           setFieldTouched,
         }) => (
-          <View preset={'column'} style={{ flex: 1 }}>
+          <View preset={'column'} style={{ flex: 1, gap: 15 }}>
             <OneTimePasscode
               value={values.otp}
               setFieldValue={setFieldValue}
@@ -83,10 +83,12 @@ export default function Otp() {
             >
               {'Continue'}
             </Button>
+            <Button preset="default" textStyle={{ fontWeight: '300' }}>
+              Didn't recieve code ?
+            </Button>
           </View>
         )}
       </Formik>
-      <Footer />
     </Screen>
   );
 }

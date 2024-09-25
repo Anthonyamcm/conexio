@@ -13,7 +13,7 @@ export default function Footer() {
         {
           text: `Log in`,
           onPress: () => {
-            clearFormData(), router.replace('/home');
+            clearFormData(), router.replace('/');
           },
         },
         {
