@@ -1,10 +1,10 @@
-import { DateField } from '@/src/config';
-import { isValidDay, isValidMonth } from '@/src/lib';
-import { useState, useCallback, useEffect, useRef, RefObject } from 'react';
+import { DateField } from '@/src/config'; // Assuming DateField is 'day' | 'month' | 'year'
+import { isValidDay, isValidMonth, isValidYear } from '@/src/lib'; // Added isValidYear for completeness
+import { useState, useCallback, useRef, RefObject, useEffect } from 'react';
 import {
+  TextInput,
   Keyboard,
   NativeSyntheticEvent,
-  TextInput,
   TextInputKeyPressEventData,
 } from 'react-native';
 
@@ -15,11 +15,11 @@ type DobDate = {
   year: string;
 };
 
-// Interface for the return type of the hook
+// Custom return type for the hook
 export interface DateOfBirthInputReturnType {
   date: DobDate;
   isComplete: boolean;
-  handleChange: (field: DateField, text: string) => void;
+  handleChange: (field: DateField, value: string) => void;
   handleKeyPress: (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
     field: DateField,
@@ -28,27 +28,27 @@ export interface DateOfBirthInputReturnType {
   dayInputRef: RefObject<TextInput>;
   monthInputRef: RefObject<TextInput>;
   yearInputRef: RefObject<TextInput>;
-  formatMap: Record<
-    'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD',
-    Array<DateField>
-  >;
+  formatMap: Record<'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD', DateField[]>;
 }
 
 const useDateOfBirthInput = (
-  setFieldValue: (field: string, value: Date | string) => void,
-  dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY/MM/DD',
+  setFieldValue: (field: string, value: string | Date) => void,
+  setFieldError: (field: string, errorMsg: string) => void, // Added for inline error setting
+  dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY/MM/DD' = 'DD/MM/YYYY',
 ): DateOfBirthInputReturnType => {
+  // Refs for managing input fields
   const dayInputRef = useRef<TextInput>(null);
   const monthInputRef = useRef<TextInput>(null);
   const yearInputRef = useRef<TextInput>(null);
 
+  // Store refs for easier navigation
   const fieldRefs = {
     day: dayInputRef,
     month: monthInputRef,
     year: yearInputRef,
   };
 
-  // Define order of inputs based on date format
+  // Map to define input field order based on date format
   const formatMap: Record<
     'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD',
     Array<DateField>
@@ -58,107 +58,97 @@ const useDateOfBirthInput = (
     'YYYY/MM/DD': ['year', 'month', 'day'],
   };
 
-  // State to manage the date input values
-  const [date, setDate] = useState<DobDate>({
-    day: '',
-    month: '',
-    year: '',
-  });
+  // State to manage date values
+  const [date, setDate] = useState<DobDate>({ day: '', month: '', year: '' });
 
-  // Derived state to check if all fields are filled
+  // Determine if all fields are valid and filled
   const isComplete =
     date.day.length === 2 && date.month.length === 2 && date.year.length === 4;
 
-  // Effect to update the parent component's state when the date is complete and valid
+  // Update Formik state when date input is complete and valid
   useEffect(() => {
     if (isComplete) {
       const { day, month, year } = date;
       const dateString = `${year}-${month}-${day}`;
       const parsedDate = new Date(dateString);
+
       if (!isNaN(parsedDate.getTime())) {
-        setFieldValue('dob', parsedDate); // Update the date in Formik
+        setFieldValue('dob', parsedDate); // Update with Date object
         Keyboard.dismiss();
       } else {
-        console.error('Invalid date:', dateString);
+        setFieldError('dob', 'Invalid date'); // Set form error if date is invalid
       }
     }
-  }, [isComplete, date, setFieldValue]);
+  }, [isComplete, date, setFieldValue, setFieldError]);
 
-  // Helper function to get next and previous field refs based on date format
-  const getFieldIndex = (field: DateField) => {
-    return formatMap[dateFormat].indexOf(field);
-  };
-
+  // Helper to get next field ref in the format order
   const getNextFieldRef = (
-    currentField: DateField,
+    field: DateField,
   ): RefObject<TextInput> | undefined => {
-    const currentIndex = getFieldIndex(currentField);
+    const currentIndex = formatMap[dateFormat].indexOf(field);
     const nextField =
-      currentIndex < 2 ? formatMap[dateFormat][currentIndex + 1] : undefined;
+      currentIndex < 2 ? formatMap[dateFormat][currentIndex + 1] : null;
     return nextField ? fieldRefs[nextField] : undefined;
   };
 
+  // Helper to get previous field ref in the format order
   const getPrevFieldRef = (
-    currentField: DateField,
+    field: DateField,
   ): RefObject<TextInput> | undefined => {
-    const currentIndex = getFieldIndex(currentField);
+    const currentIndex = formatMap[dateFormat].indexOf(field);
     const prevField =
-      currentIndex > 0 ? formatMap[dateFormat][currentIndex - 1] : undefined;
+      currentIndex > 0 ? formatMap[dateFormat][currentIndex - 1] : null;
     return prevField ? fieldRefs[prevField] : undefined;
   };
 
-  // Function to handle input changes and focus on the next or previous field if needed
+  // Handle changes in input fields and validate them
   const handleChange = useCallback(
-    (field: DateField, text: string) => {
+    (field: DateField, value: string) => {
       setDate((prev) => {
-        const newDate = { ...prev, [field]: text };
-        setFieldValue(`dob.${field}`, text); // Update the Formik field with the new date object
+        const newDate = { ...prev, [field]: value };
+
+        // Field-specific validation and error messaging
+        if (
+          field === 'day' &&
+          value.length === 2 &&
+          !isValidDay(value, newDate.month, newDate.year)
+        ) {
+          setFieldError('dob.day', 'Invalid day');
+        }
+        if (field === 'month' && value.length === 2 && !isValidMonth(value)) {
+          setFieldError('dob.month', 'Invalid month');
+        }
+        if (field === 'year' && value.length === 4 && !isValidYear(value)) {
+          setFieldError('dob.year', 'Invalid year');
+        }
+
         return newDate;
       });
 
-      // Validation logic for month and day
-      const monthNum =
-        field === 'month' ? parseInt(text, 10) : parseInt(date.month, 10);
-      const yearNum =
-        field === 'year' ? parseInt(text, 10) : parseInt(date.year, 10);
-
-      // If the user is in the day field, check if the day is valid but still allow input
-      if (field === 'day') {
-        if (text.length > 0 && !isValidDay(text, monthNum, yearNum)) {
-          // Optionally: Set an error state to indicate invalid day input
-          console.warn('Invalid day input');
-        }
-      } else if (field === 'month') {
-        if (text.length > 0 && !isValidMonth(text)) {
-          // Optionally: Set an error state to indicate invalid month input
-          console.warn('Invalid month input');
-        }
-      }
-
-      // Determine the next and previous field references based on the current field
-      const nextFieldRef = getNextFieldRef(field);
-      const prevFieldRef = getPrevFieldRef(field);
-
-      // Focus logic
-      if (text.length === 2 && nextFieldRef?.current) {
-        nextFieldRef.current.focus();
-      } else if (text.length === 0 && prevFieldRef?.current) {
-        prevFieldRef.current.focus();
+      // Focus management based on input length
+      if (value.length === 2 && field !== 'year') {
+        const nextField = getNextFieldRef(field);
+        nextField?.current?.focus();
+      } else if (value.length === 0 && field !== 'day') {
+        const prevField = getPrevFieldRef(field);
+        prevField?.current?.focus();
       }
     },
-    [date, setFieldValue, getNextFieldRef, getPrevFieldRef],
+    [setFieldError, getNextFieldRef, getPrevFieldRef],
   );
 
-  // Function to handle key presses, specifically for backspace
+  // Handle key presses like backspace to clear fields and move focus
   const handleKeyPress = useCallback(
     (e: NativeSyntheticEvent<TextInputKeyPressEventData>, field: DateField) => {
-      if (e.nativeEvent.key === 'Backspace') {
-        handleChange(field, ''); // Clear the current field and focus on the previous
+      if (e.nativeEvent.key === 'Backspace' && date[field].length === 0) {
+        const prevField = getPrevFieldRef(field);
+        prevField?.current?.focus();
       }
     },
-    [handleChange],
+    [date],
   );
 
+  // Reset fields and clear formik values
   const resetFields = useCallback(() => {
     setDate({ day: '', month: '', year: '' });
     dayInputRef.current?.clear();
