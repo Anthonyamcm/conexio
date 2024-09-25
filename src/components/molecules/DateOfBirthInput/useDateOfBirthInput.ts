@@ -6,12 +6,14 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 
+// Type for the date object
 type DobDate = {
   day: string;
   month: string;
   year: string;
 };
 
+// Interface for the return type of the hook
 export interface DateOfBirthInputReturnType {
   date: DobDate;
   isComplete: boolean;
@@ -32,55 +34,66 @@ export interface DateOfBirthInputReturnType {
 const useDateOfBirthInput = (
   setFieldValue: (field: string, value: Date) => void,
   value: Date | null,
-) => {
+): DateOfBirthInputReturnType => {
+  // Refs for the input fields
   const dayInputRef = useRef<TextInput | null>(null);
   const monthInputRef = useRef<TextInput | null>(null);
   const yearInputRef = useRef<TextInput | null>(null);
+
+  // State to manage the date input values
   const [date, setDate] = useState<DobDate>({
     day: value ? String(value.getDate()).padStart(2, '0') : '',
     month: value ? String(value.getMonth() + 1).padStart(2, '0') : '',
     year: value ? String(value.getFullYear()) : '',
   });
 
+  // Derived state to check if all fields are filled
   const isComplete =
     date.day.length === 2 && date.month.length === 2 && date.year.length === 4;
 
-  // Consolidate the main logic into one useEffect
+  // Effect to update the parent component's state when the date is complete and valid
   useEffect(() => {
     if (isComplete) {
       const { day, month, year } = date;
       const dateString = `${year}-${month}-${day}`;
-      const dateObject = new Date(dateString);
+      const parsedDate = new Date(dateString);
 
-      if (!isNaN(dateObject.getTime())) {
-        setFieldValue('dob', dateObject);
-        Keyboard.dismiss();
+      // Check if the parsed date is valid
+      if (!isNaN(parsedDate.getTime())) {
+        setFieldValue('dob', parsedDate);
+        Keyboard.dismiss(); // Dismiss the keyboard after a valid date is entered
       } else {
+        // Handle invalid date gracefully (e.g., show an error message)
         console.error('Invalid date:', dateString);
       }
     }
   }, [isComplete, date, setFieldValue]);
 
-  const InputChangeHandler = useCallback(
+  // Function to handle input changes and focus on the next field if needed
+  const handleInputChange = useCallback(
     (
       text: string,
-      nextRef?: React.RefObject<TextInput>,
-      prevRef?: React.RefObject<TextInput>,
+      nextRef?: RefObject<TextInput>,
+      prevRef?: RefObject<TextInput>,
     ) => {
-      if (text.length === 0 && prevRef && prevRef.current) {
+      // If the input is empty and there's a previous field, focus on it
+      if (text.length === 0 && prevRef?.current) {
         prevRef.current.focus();
-      } else if (text.length === 2 && nextRef && nextRef?.current) {
+      }
+      // If the input has reached its max length and there's a next field, focus on it
+      else if (text.length === 2 && nextRef?.current) {
         nextRef.current.focus();
       }
     },
     [],
   );
 
+  // Function to handle key presses, specifically for backspace to move to the previous field
   const handleKeyPress = useCallback(
     (
       e: NativeSyntheticEvent<TextInputKeyPressEventData>,
       text: string,
-      prevRef?: React.RefObject<TextInput>,
+      prevRef?: RefObject<TextInput>,
     ) => {
       if (
         e.nativeEvent.key === 'Backspace' &&
@@ -93,35 +106,37 @@ const useDateOfBirthInput = (
     [],
   );
 
+  // Handlers for each input field's change events
   const handleDayChange = useCallback(
     (text: string) => {
       setDate((prev) => ({ ...prev, day: text }));
-      InputChangeHandler(text, monthInputRef, undefined); // Adjust based on which fields you focus on
+      handleInputChange(text, monthInputRef);
     },
-    [InputChangeHandler],
+    [handleInputChange],
   );
 
   const handleMonthChange = useCallback(
     (text: string) => {
       setDate((prev) => ({ ...prev, month: text }));
-      InputChangeHandler(text, yearInputRef, dayInputRef); // Adjust as needed
+      handleInputChange(text, yearInputRef, dayInputRef);
     },
-    [InputChangeHandler],
+    [handleInputChange],
   );
 
   const handleYearChange = useCallback(
     (text: string) => {
       setDate((prev) => ({ ...prev, year: text }));
-      InputChangeHandler(text, undefined, monthInputRef); // Adjust as needed
+      handleInputChange(text, undefined, monthInputRef);
     },
-    [InputChangeHandler],
+    [handleInputChange],
   );
 
+  // Function to reset all input fields
   const resetFields = useCallback(() => {
-    setDate((prev) => ({ ...prev, name: '', month: '', year: '' }));
-    if (dayInputRef.current) dayInputRef.current.clear();
-    if (monthInputRef.current) monthInputRef.current.clear();
-    if (yearInputRef.current) yearInputRef.current.clear();
+    setDate({ day: '', month: '', year: '' });
+    dayInputRef.current?.clear();
+    monthInputRef.current?.clear();
+    yearInputRef.current?.clear();
   }, []);
 
   return {

@@ -10,6 +10,19 @@ const dobSchema = yup.object().shape({
   dob: yup
     .date()
     .required('Date of birth is required')
+    .test('is-at-least-16', 'You must be at least 16 years old', (value) => {
+      if (!value) return false;
+
+      const today = new Date();
+      const minAgeDate = new Date(
+        today.getFullYear() - 16,
+        today.getMonth(),
+        today.getDate(),
+      );
+
+      // Check if the date makes the user at least 16 years old
+      return value <= minAgeDate;
+    })
     .test('is-valid-date', 'Invalid date', (value) => {
       if (!value) return false;
 
@@ -27,19 +40,6 @@ const dobSchema = yup.object().shape({
 
       // Ensure the date is within the realistic range
       return value <= maxDate && value >= minDate;
-    })
-    .test('is-at-least-16', 'You must be at least 16 years old', (value) => {
-      if (!value) return false;
-
-      const today = new Date();
-      const minAgeDate = new Date(
-        today.getFullYear() - 16,
-        today.getMonth(),
-        today.getDate(),
-      );
-
-      // Check if the date makes the user at least 16 years old
-      return value <= minAgeDate;
     }),
 });
 

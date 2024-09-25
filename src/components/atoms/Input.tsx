@@ -203,7 +203,7 @@ const inputWrapperStyle: ViewStyle = {
 const inputStyle: TextStyle = {
   flex: 1,
   alignSelf: 'stretch',
-  fontFamily: typography.primary.normal,
+  fontFamily: typography.primary.medium,
   color: colors.text,
   fontSize: 16,
   height: 32,
