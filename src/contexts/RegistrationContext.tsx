@@ -10,14 +10,13 @@ import { validateSchemaPartially } from '../lib/helpers';
 import { router } from 'expo-router';
 
 // Define the shape of the form data
-interface FormData {
+export interface FormData {
   name: string;
-  dob: Date | null;
+  dob: Date;
   email?: string;
   mobile?: string;
-  otp?: string;
+  OTP: string;
   password: string;
-  confirmPassword: string;
   username: string;
 }
 
@@ -32,12 +31,11 @@ const initialState: RegistrationState = {
   currentStep: 0,
   formData: {
     name: '',
-    dob: null,
+    dob: new Date(),
     email: '',
     mobile: '',
-    otp: '',
+    OTP: '',
     password: '',
-    confirmPassword: '',
     username: '',
   },
   errors: {},
@@ -96,10 +94,12 @@ interface RegistrationContextProps {
   validateStep: (
     validationSchema: yup.ObjectSchema<any>,
     fieldsToValidate: string[],
+    dataToValidate: Partial<FormData>,
   ) => Promise<boolean>;
   handleSubmitStep: (
     validationSchema: yup.ObjectSchema<any>,
     fieldsToValidate: string[],
+    formData: Partial<FormData>,
   ) => Promise<void>;
   nextStep: () => void;
   prevStep: () => void;
@@ -135,6 +135,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
 
   // Function to update form data
   const setFormData = (newData: Partial<FormData>) => {
+    console.log({ newData });
     dispatch({ type: 'SET_FORM_DATA', payload: newData });
   };
 
@@ -148,16 +149,18 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
     async (
       validationSchema: yup.ObjectSchema<any>,
       fieldsToValidate: string[],
+      dataToValidate: Partial<FormData>,
     ): Promise<boolean> => {
       const errors = await validateSchemaPartially(
         validationSchema,
-        state.formData,
+        dataToValidate,
         fieldsToValidate,
       );
       if (Object.keys(errors).length === 0) {
         setErrors({});
         return true;
       } else {
+        console.log({ errors });
         setErrors(errors);
         return false;
       }
@@ -169,9 +172,17 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   const handleSubmitStep = async (
     validationSchema: yup.ObjectSchema<any>,
     fieldsToValidate: string[],
+    formData: Partial<FormData>,
   ): Promise<void> => {
-    const isValid = await validateStep(validationSchema, fieldsToValidate);
+    const isValid = await validateStep(
+      validationSchema,
+      fieldsToValidate,
+      formData,
+    );
+    console.log({ isValid });
     if (isValid) {
+      console.log({ formData });
+      setFormData(formData);
       goToNextScreen();
       nextStep();
     }

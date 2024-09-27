@@ -22,18 +22,17 @@ interface UseOneTimePasscodeProps {
 
 // Custom hook for handling OTP input
 const useOneTimePasscode = (
-  initialValue: string,
   setFieldValue: SetFieldFunction,
   setFieldTouched: SetTouchedFunction,
 ): UseOneTimePasscodeProps => {
-  const inputRefs = useRef<(TextInput | null)[]>(Array(6).fill(null));
+  const inputRefs = useRef<TextInput[]>(Array(6).fill(null));
   const [inputs, setInputs] = useState<string[]>(Array(6).fill(''));
 
   useEffect(() => {
     if (inputs.every((input) => input.length === 1)) {
       const code = inputs.join('');
-      setFieldTouched('otp', true);
-      setFieldValue('otp', code);
+      setFieldTouched('OTP', true);
+      setFieldValue('OTP', code);
       Keyboard.dismiss();
     }
   }, [inputs, setFieldTouched, setFieldValue]);

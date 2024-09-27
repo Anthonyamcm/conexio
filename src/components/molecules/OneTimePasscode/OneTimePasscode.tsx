@@ -11,15 +11,15 @@ interface OneTimePasscodeHandle {
 interface OneTimePasscodeProps {
   setFieldValue: (field: string, value: string) => void;
   setFieldTouched: (field: string, isTouched: boolean) => void;
-  touched: { otp?: boolean };
+  touched: { OTP?: boolean };
   error?: string;
   value: string;
 }
 
 const OneTimePasscode = forwardRef<OneTimePasscodeHandle, OneTimePasscodeProps>(
-  ({ setFieldValue, setFieldTouched, touched, error, value }, ref) => {
+  ({ setFieldValue, setFieldTouched, touched, error }) => {
     const { inputRefs, inputs, handleInputChange, handleKeyPress } =
-      useOneTimePasscode(value, setFieldValue, setFieldTouched);
+      useOneTimePasscode(setFieldValue, setFieldTouched);
 
     return (
       <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
@@ -38,11 +38,11 @@ const OneTimePasscode = forwardRef<OneTimePasscodeHandle, OneTimePasscodeProps>(
               onChangeText={(text) => handleInputChange(index, text)}
               onKeyPress={(e) => handleKeyPress(index, e)}
               value={char} // Ensure this uses the correct character
-              error={!!error && touched.otp}
+              error={!!error && touched.OTP}
             />
           ))}
         </View>
-        {error && touched.otp && (
+        {error && touched.OTP && (
           <Text
             preset="bold"
             style={{ color: colors.palette.error100, marginTop: spacing.xs }}

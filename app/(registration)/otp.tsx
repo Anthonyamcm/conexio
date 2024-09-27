@@ -1,41 +1,44 @@
 import { Button, Footer, Screen, View } from '@/src/components/atoms';
 import { Header, OneTimePasscode } from '@/src/components/molecules';
-import { useRegistration } from '@/src/contexts/RegistrationContext';
+import { useRegistration, FormData } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
-import { Formik, FormikHelpers } from 'formik';
+import { useFormik } from 'formik';
+import { useCallback, useRef } from 'react';
+import { TextInput } from 'react-native-gesture-handler';
 import * as Yup from 'yup';
 
+// Define validation schema using Yup
 const otpSchema = Yup.object().shape({
-  otp: Yup.string()
+  OTP: Yup.string()
     .required('OTP is required')
     .length(6, 'OTP must be exactly 6 digits')
     .matches(/^\d+$/, 'OTP must be a number'),
 });
 
-interface OtpValues {
-  otp: string;
+interface FormValues {
+  OTP: string;
 }
 
 export default function Otp() {
-  const { state, setFormData, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep } = useRegistration();
+  const otpRef = useRef<TextInput>(null);
+  // Handle OTP submission
+  const handleSubmit = useCallback(
+    async (values: FormValues) => {
+      await handleSubmitStep(otpSchema, ['OTP'], {
+        ...values,
+        OTP: values.OTP,
+      }); // Proceed to next step after validation
+    },
+    [handleSubmitStep],
+  );
 
-  const handleSubmit = async (
-    values: OtpValues,
-    { setSubmitting, setErrors }: FormikHelpers<OtpValues>,
-  ) => {
-    const otp = values.otp;
-
-    // Check if OTP is valid
-    if (!otp || otp.length < 6) {
-      setErrors({ otp: 'Please enter a valid OTP.' });
-      setSubmitting(false);
-      return;
-    }
-
-    setFormData(values);
-    await handleSubmitStep(otpSchema, ['otp']);
-    setSubmitting(false);
-  };
+  // Formik hook for managing form state
+  const formik = useFormik<FormValues>({
+    initialValues: { OTP: state.formData.OTP },
+    validationSchema: otpSchema,
+    onSubmit: handleSubmit,
+  });
 
   return (
     <Screen
@@ -46,49 +49,33 @@ export default function Otp() {
       }}
     >
       <Header
-        title={`Enter the confirmation code`}
-        subtitle={`To confirm your account, enter the 6-digit code that we sent to ${state.formData.mobile ? state.formData.mobile : state.formData.email}`}
+        title="Enter the confirmation code"
+        subtitle={`To confirm your account, enter the 6-digit code that we sent to ${
+          state.formData.mobile || state.formData.email
+        }`}
       />
-      <Formik
-        initialValues={{ otp: state.formData.otp || '' }}
-        validationSchema={otpSchema}
-        onSubmit={handleSubmit}
-      >
-        {({
-          handleSubmit,
-          errors,
-          values,
-          touched,
-          isValid,
-          setFieldValue,
-          setFieldTouched,
-        }) => (
-          <View preset={'column'} style={{ flex: 1, gap: 15 }}>
-            <OneTimePasscode
-              value={values.otp}
-              setFieldValue={setFieldValue}
-              setFieldTouched={setFieldTouched}
-              touched={touched as { otp: boolean }}
-              error={errors.otp as string}
-            />
-            <Button
-              preset={'gradient'}
-              gradient={[
-                colors.palette.primary100,
-                colors.palette.secondary100,
-              ]}
-              onPress={() => handleSubmit()}
-              disabled={!isValid} // Disable if form is not valid
-              isLoading={false}
-            >
-              {'Continue'}
-            </Button>
-            <Button preset="default" textStyle={{ fontWeight: '300' }}>
-              Didn't recieve code ?
-            </Button>
-          </View>
-        )}
-      </Formik>
+      <View preset={'column'} style={{ flex: 1, gap: 15 }}>
+        <OneTimePasscode
+          value={formik.values.OTP}
+          setFieldValue={formik.setFieldValue}
+          setFieldTouched={formik.setFieldTouched}
+          touched={formik.touched as { OTP: boolean }}
+          error={formik.errors.OTP as string}
+        />
+        <Button
+          preset="gradient"
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={() => formik.handleSubmit()}
+          disabled={!formik.isValid || formik.isSubmitting}
+          isLoading={formik.isSubmitting}
+        >
+          Continue
+        </Button>
+        <Button preset="default" textStyle={{ fontWeight: '300' }}>
+          Didn't receive code?
+        </Button>
+      </View>
+      <Footer />
     </Screen>
   );
 }

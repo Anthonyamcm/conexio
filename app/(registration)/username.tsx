@@ -16,7 +16,7 @@ import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 import _ from 'lodash';
 
 // Define FormData type
-type FormData = {
+type FormValues = {
   username: string;
 };
 
@@ -45,7 +45,7 @@ const usernameSchema = Yup.object().shape({
 });
 
 export default function Username() {
-  const { state, setFormData, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep } = useRegistration();
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const usernameRef = useRef<TextInput>(null);
@@ -61,16 +61,13 @@ export default function Username() {
       try {
         const available = await checkUsernameAvailability(username);
         setIsAvailable(available);
-        if (available) {
-          setFormData({ username });
-        }
       } catch (error) {
         console.error('Error checking username availability:', error);
       } finally {
         setIsChecking(false);
       }
     }, 500),
-    [setFormData],
+    [],
   );
 
   useEffect(() => {
@@ -79,16 +76,18 @@ export default function Username() {
 
   // Memoized submit handler
   const handleSubmit = useCallback(
-    async (values: FormData) => {
+    async (values: FormValues) => {
       if (!(await checkUsernameAvailability(values.username))) {
         setIsAvailable(false);
         return;
       }
       setIsAvailable(true);
-      setFormData(values);
-      await handleSubmitStep(usernameSchema, ['username']);
+      await handleSubmitStep(usernameSchema, ['username'], {
+        ...values,
+        username: values.username,
+      });
     },
-    [setFormData, handleSubmitStep],
+    [handleSubmitStep],
   );
 
   // Memoized icon color function
@@ -101,8 +100,8 @@ export default function Username() {
   );
 
   // Formik usage optimized with useFormik hook
-  const formik = useFormik<FormData>({
-    initialValues: { username: state.formData.username || '' },
+  const formik = useFormik<FormValues>({
+    initialValues: { username: state.formData.username },
     validationSchema: usernameSchema,
     onSubmit: handleSubmit,
   });
@@ -172,7 +171,7 @@ export default function Username() {
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit}
+          onPress={() => formik.handleSubmit()}
           disabled={!formik.isValid || formik.isSubmitting}
           isLoading={formik.isSubmitting}
         >

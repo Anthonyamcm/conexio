@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
-import { Formik, FormikHelpers } from 'formik';
+import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js';
 import 'yup-phone-lite';
@@ -21,13 +21,13 @@ const mobileSchema = (countryCode: string) =>
       .required('Mobile number is required'),
   });
 
-// Define types for Formik values and submit function
+// Define types for form values
 interface FormValues {
   mobile: string;
 }
 
 export default function Mobile() {
-  const { state, setFormData, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep } = useRegistration();
   const mobileRef = useRef<TextInput>(null);
   const [show, setShow] = useState<boolean>(false);
   const [countryCode, setCountryCode] = useState<ICountryCode>({
@@ -36,17 +36,17 @@ export default function Mobile() {
     country: 'GB',
   });
 
+  // Handle form submission
   const handleSubmit = useCallback(
-    async (
-      values: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>,
-    ) => {
+    async (values: FormValues) => {
+      console.log({ values });
       const phoneNumber = parsePhoneNumber(countryCode.code + values.mobile);
-      setFormData({ ...values, mobile: phoneNumber.number });
-      await handleSubmitStep(mobileSchema(countryCode.country), ['mobile']);
-      setSubmitting(false);
+      await handleSubmitStep(mobileSchema(countryCode.country), ['mobile'], {
+        ...values,
+        mobile: phoneNumber.number,
+      });
     },
-    [countryCode, setFormData, handleSubmitStep],
+    [countryCode, handleSubmitStep],
   );
 
   const handleCountryCodePress = useCallback(() => {
@@ -73,70 +73,53 @@ export default function Mobile() {
     router.push('/(registration)/email');
   }, []);
 
+  // Formik usage
+  const formik = useFormik<FormValues>({
+    initialValues: { mobile: state.formData.mobile || '' },
+    validationSchema: mobileSchema(countryCode.country),
+    onSubmit: handleSubmit,
+  });
+
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
         title="What's your mobile number?"
         subtitle="Enter the mobile number on which you can be contacted. No one will see this on your profile."
       />
-      <Formik
-        initialValues={{ mobile: state.formData.mobile || '' }}
-        validationSchema={mobileSchema(countryCode.country)}
-        onSubmit={handleSubmit}
-      >
-        {({
-          handleChange,
-          handleSubmit,
-          handleBlur,
-          values,
-          errors,
-          touched,
-          isValid,
-          isSubmitting,
-        }) => (
-          <View style={styles.formContainer}>
-            <MobileNumberInputField
-              countryCode={countryCode}
-              onCountryCodePress={handleCountryCodePress}
-              value={values.mobile}
-              onChangeText={(text) => {
-                const formattedNumber = formatPhoneNumber(text);
-                handleChange('mobile')(formattedNumber);
-                setFormData({
-                  ...values,
-                  mobile: formattedNumber,
-                });
-              }}
-              containerStyle={{ flex: 1 }}
-              onBlur={handleBlur('mobile')}
-              ref={mobileRef}
-              showError={!!errors.mobile && touched.mobile}
-              accessibilityLabel="Mobile number input"
-              errorText={errors.mobile}
-              touched={touched as { mobile: boolean }}
-            />
-            <Button
-              preset="gradient"
-              gradient={[
-                colors.palette.primary100,
-                colors.palette.secondary100,
-              ]}
-              onPress={() => handleSubmit()}
-              disabled={!isValid || isSubmitting}
-              isLoading={isSubmitting}
-            >
-              Continue
-            </Button>
-            <Button
-              preset="default"
-              textStyle={{ fontWeight: '300' }}
-              onPress={emailPressed}
-            >
-              Sign up with email
-            </Button>
-          </View>
-        )}
-      </Formik>
+      <View style={styles.formContainer}>
+        <MobileNumberInputField
+          countryCode={countryCode}
+          onCountryCodePress={handleCountryCodePress}
+          value={formik.values.mobile}
+          onChangeText={(text) => {
+            const formattedNumber = formatPhoneNumber(text);
+            formik.setFieldValue('mobile', formattedNumber);
+          }}
+          containerStyle={{ flex: 1 }}
+          onBlur={formik.handleBlur('mobile')}
+          ref={mobileRef}
+          showError={!!formik.errors.mobile && formik.touched.mobile}
+          accessibilityLabel="Mobile number input"
+          errorText={formik.errors.mobile}
+          touched={formik.touched as { mobile: boolean }}
+        />
+        <Button
+          preset="gradient"
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={() => formik.handleSubmit()}
+          disabled={!formik.isValid || formik.isSubmitting}
+          isLoading={formik.isSubmitting}
+        >
+          Continue
+        </Button>
+        <Button
+          preset="default"
+          textStyle={{ fontWeight: '300' }}
+          onPress={emailPressed}
+        >
+          Sign up with email
+        </Button>
+      </View>
       <Footer />
       <CountryPicker
         lang="en"

@@ -1,11 +1,13 @@
-import { Button, Footer, Screen, Text, View } from '@/src/components/atoms';
+import React, { useCallback } from 'react';
+import { Button, Footer, Screen } from '@/src/components/atoms';
 import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utlis';
-import { Formik } from 'formik';
-import { useCallback } from 'react';
+import { useFormik } from 'formik';
 import * as yup from 'yup';
+import { StyleSheet, View } from 'react-native';
 
+// Yup validation schema for Date of Birth
 const dobSchema = yup.object().shape({
   dob: yup.object().shape({
     day: yup
@@ -26,85 +28,90 @@ const dobSchema = yup.object().shape({
   }),
 });
 
-export default function Dob() {
-  const { state, setFormData, handleSubmitStep } = useRegistration();
+// Define form values type
+type FormValues = {
+  dob: {
+    day: string;
+    month: string;
+    year: string;
+  };
+};
 
+export default function Dob() {
+  const { state, handleSubmitStep } = useRegistration();
+
+  // Handle form submission
   const handleSubmit = useCallback(
-    async (
-      values: { dob: { day: string; month: string; year: string } },
-      { setSubmitting }: { setSubmitting: (isSubmitting: boolean) => void },
-    ) => {
+    async (values: FormValues) => {
       const dateString = `${values.dob.year}-${values.dob.month}-${values.dob.day}`;
       const parsedDate = new Date(dateString);
-      setFormData({ dob: parsedDate });
-      await handleSubmitStep(dobSchema, ['dob']);
-      setSubmitting(false);
+
+      // Call the handleSubmitStep with form data and proceed
+      await handleSubmitStep(dobSchema, ['dob'], { dob: parsedDate });
     },
-    [setFormData, handleSubmitStep],
+    [handleSubmitStep],
   );
 
+  // Formik usage
+  const formik = useFormik<FormValues>({
+    initialValues: {
+      dob: {
+        day: state.formData.dob?.getDate().toString() || '',
+        month: (state.formData.dob?.getMonth() + 1).toString() || '',
+        year: state.formData.dob?.getFullYear().toString() || '',
+      },
+    },
+    validationSchema: dobSchema,
+    onSubmit: handleSubmit,
+  });
+
   return (
-    <Screen
-      preset="auto"
-      contentContainerStyle={{
-        flex: 1,
-        padding: spacing.lg,
-      }}
-    >
+    <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
-        title={`What's your date of birth?`}
-        subtitle={`Enter your date of birth (you must be 16+). This won't appear on your profile.`}
+        title="What's your date of birth?"
+        subtitle="Enter your date of birth (you must be 16+). This won't appear on your profile."
       />
-      <Formik
-        initialValues={{
-          dob: { day: '', month: '', year: '' },
-        }}
-        validationSchema={dobSchema}
-        onSubmit={handleSubmit}
-      >
-        {({
-          handleSubmit,
-          errors,
-          values,
-          touched,
-          isValid,
-          setFieldValue,
-          setFieldTouched,
-          setFieldError,
-        }) => (
-          <View preset={'column'} style={{ flex: 1 }}>
-            <DateOfBirthInput
-              value={values.dob}
-              setFieldValue={setFieldValue}
-              setFieldTouched={setFieldTouched}
-              setFieldError={setFieldError}
-              touched={{
-                day: touched.dob?.day || false,
-                month: touched.dob?.month || false,
-                year: touched.dob?.year || false,
-              }}
-              errors={{
-                day: errors.dob?.day,
-                month: errors.dob?.month,
-                year: errors.dob?.year,
-              }}
-            />
-            <Button
-              preset={'gradient'}
-              gradient={[
-                colors.palette.primary100,
-                colors.palette.secondary100,
-              ]}
-              onPress={() => handleSubmit()}
-              disabled={!isValid}
-              isLoading={false}
-            >
-              {'Continue'}
-            </Button>
-          </View>
-        )}
-      </Formik>
+      <View style={styles.formContainer}>
+        <DateOfBirthInput
+          value={formik.values.dob}
+          setFieldValue={formik.setFieldValue}
+          setFieldTouched={formik.setFieldTouched}
+          setFieldError={formik.setFieldError}
+          touched={{
+            day: formik.touched.dob?.day || false,
+            month: formik.touched.dob?.month || false,
+            year: formik.touched.dob?.year || false,
+          }}
+          errors={{
+            day: formik.errors.dob?.day,
+            month: formik.errors.dob?.month,
+            year: formik.errors.dob?.year,
+          }}
+        />
+
+        <Button
+          preset="gradient"
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={() => formik.handleSubmit()}
+          disabled={!formik.isValid || formik.isSubmitting}
+          isLoading={formik.isSubmitting}
+        >
+          Continue
+        </Button>
+      </View>
       <Footer />
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: spacing.lg,
+  },
+  formContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 15,
+  },
+});
