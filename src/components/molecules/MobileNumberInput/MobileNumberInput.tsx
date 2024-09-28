@@ -1,16 +1,11 @@
 import React, { forwardRef, memo, useMemo } from 'react';
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-  TextInputProps,
-} from 'react-native';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Input, Text } from '../../atoms';
 import { colors, spacing } from '@/src/utils';
 import { ICountryCode } from '@/src/config';
+import { InputProps } from '../../atoms/Input';
 
-interface MobileNumberInputFieldProps extends TextInputProps {
+interface MobileNumberInputFieldProps extends Omit<InputProps, 'error'> {
   countryCode: ICountryCode;
   onCountryCodePress: () => void;
   error?: string;
@@ -20,7 +15,15 @@ interface MobileNumberInputFieldProps extends TextInputProps {
 const MobileNumberInputField = memo(
   forwardRef<TextInput, MobileNumberInputFieldProps>(
     (
-      { countryCode, onCountryCodePress, error, touched, style, ...inputProps },
+      {
+        countryCode,
+        onCountryCodePress,
+        error,
+        errorText,
+        touched,
+        style,
+        ...inputProps
+      },
       ref,
     ) => {
       // Memoize styles based on error state to avoid unnecessary re-renders
@@ -70,7 +73,9 @@ const MobileNumberInputField = memo(
               {...inputProps}
             />
           </View>
-          {error && touched && <Text style={styles.errorText} text={error} />}
+          {error && touched && (
+            <Text preset="bold" style={styles.errorText} text={error} />
+          )}
         </View>
       );
     },
@@ -104,7 +109,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.palette.error100,
     marginTop: spacing.xs,
-    fontWeight: '500',
   },
 });
 

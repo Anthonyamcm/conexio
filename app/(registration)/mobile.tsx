@@ -120,8 +120,8 @@ export default function Mobile() {
           onBlur={formik.handleBlur('mobile')}
           error={formik.errors.mobile}
           touched={formik.touched.mobile}
-          placeholder="Mobile number"
           accessibilityLabel="Mobile number input"
+          containerStyle={{ flex: 1 }}
         />
         <Button
           preset="gradient"
