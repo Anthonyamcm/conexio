@@ -16,7 +16,7 @@ export default function ProgressBar({ numberOfSteps }: StepsProps) {
 
   // Calculate the progress as a percentage based on the number of steps
   const progressPercentage = useMemo(() => {
-    return (completedSteps / numberOfSteps) * 100; // Progress percentage
+    return Math.round((completedSteps / numberOfSteps) * 100); // Progress percentage
   }, [completedSteps, numberOfSteps]);
 
   return (
@@ -36,14 +36,14 @@ export default function ProgressBar({ numberOfSteps }: StepsProps) {
 const styles = StyleSheet.create({
   progressBarContainer: {
     width: '100%', // Full width of the parent container
-    height: 8, // Height of the progress bar
+    height: 15,
     backgroundColor: colors.palette.neutral200, // Background color for incomplete progress
-    borderRadius: 4,
+    borderRadius: 8,
     marginBottom: spacing.md, // Spacing below the progress bar
     overflow: 'hidden', // Make sure progress bar has rounded corners
   },
   progressBar: {
     height: '100%', // Full height of the progress container
-    borderRadius: 4, // Rounded corners for progress bar
+    borderRadius: 8, // Rounded corners for progress bar
   },
 });

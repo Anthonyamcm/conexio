@@ -63,5 +63,6 @@ const styles = StyleSheet.create({
   },
   progressBarWrapper: {
     flex: 1, // Makes the progress bar take up the remaining space
+    alignItems: 'center',
   },
 });
