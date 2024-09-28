@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
+import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { Button, Input, Screen, Text } from '@/src/components/atoms';
 import { colors, spacing } from '@/src/utils';
-import Feather from '@expo/vector-icons/Feather';
-import { Formik } from 'formik';
-import * as Yup from 'yup';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Header } from '@/src/components/molecules';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
 
-// Validation schema using Yup
+interface FormValues {
+  email: string;
+  password: string;
+}
+
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email('Invalid email address')
@@ -19,10 +22,48 @@ const loginSchema = Yup.object().shape({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const router = useRouter();
 
-  const handleSubmit = () => {
-    console.log('submit');
-  };
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  const formik = useFormik<FormValues>({
+    initialValues: { email: '', password: '' },
+    validationSchema: loginSchema,
+    onSubmit: async (values: FormValues) => {
+      try {
+        // Handle login logic here
+        console.log('Login submitted:', values);
+        // Navigate to the home screen or handle login success
+        // Example:
+        // await loginUser(values.email, values.password);
+        // router.push('/home');
+      } catch (error) {
+        console.error('Error during login:', error);
+        Alert.alert(
+          'Login Error',
+          'An error occurred during login. Please try again.',
+        );
+      }
+    },
+    validateOnChange: true,
+    validateOnBlur: true,
+  });
+
+  const getIconColor = useCallback(
+    (fieldName: keyof FormValues) => {
+      return formik.errors[fieldName] && formik.touched[fieldName]
+        ? colors.palette.error100
+        : colors.palette.neutral400;
+    },
+    [formik.errors, formik.touched],
+  );
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -30,91 +71,73 @@ export default function Login() {
         title="Sign in"
         subtitle="Enter your email and password to access your account."
       />
-      <Formik
-        initialValues={{ email: '', password: '' }}
-        validationSchema={loginSchema}
-        onSubmit={handleSubmit}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          values,
-          errors,
-          touched,
-          isValid,
-        }) => (
-          <View style={styles.formContainer}>
-            <Input
-              placeholder="Email"
-              value={values.email}
-              onChangeText={handleChange('email')}
-              onBlur={handleBlur('email')}
-              LeftAccessory={() => (
-                <Ionicons
-                  name="mail"
-                  size={26}
-                  color={
-                    errors.email && touched.email
-                      ? colors.palette.error100
-                      : colors.palette.neutral400
-                  }
-                  style={styles.icon}
-                />
-              )}
-              error={touched.email && !!errors.email}
-              errorText={errors.email}
+      <View style={styles.formContainer}>
+        <Input
+          placeholder="Email"
+          value={formik.values.email}
+          onChangeText={formik.handleChange('email')}
+          onBlur={formik.handleBlur('email')}
+          LeftAccessory={() => (
+            <Ionicons
+              name="mail"
+              size={26}
+              color={getIconColor('email')}
+              style={styles.icon}
             />
-            <Input
-              placeholder="Password"
-              value={values.password}
-              onChangeText={handleChange('password')}
-              onBlur={handleBlur('password')}
-              secureTextEntry={!showPassword}
-              LeftAccessory={() => (
-                <Ionicons
-                  name="lock-closed"
-                  size={26}
-                  color={
-                    errors.password && touched.password
-                      ? colors.palette.error100
-                      : colors.palette.neutral400
-                  }
-                  style={styles.icon}
-                />
-              )}
-              RightAccessory={() => (
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  style={[styles.icon, { marginEnd: 12 }]}
-                >
-                  <Ionicons
-                    name={showPassword ? 'eye' : 'eye-off'}
-                    size={26}
-                    color={colors.palette.neutral400}
-                  />
-                </TouchableOpacity>
-              )}
-              error={touched.password && !!errors.password}
-              errorText={errors.password}
+          )}
+          error={!!formik.errors.email && formik.touched.email}
+          errorText={formik.touched.email ? formik.errors.email : undefined}
+        />
+        <Input
+          placeholder="Password"
+          value={formik.values.password}
+          onChangeText={formik.handleChange('password')}
+          onBlur={formik.handleBlur('password')}
+          secureTextEntry={!showPassword}
+          LeftAccessory={() => (
+            <Ionicons
+              name="lock-closed"
+              size={26}
+              color={getIconColor('password')}
+              style={styles.icon}
             />
-            <Button
-              preset="gradient"
-              gradient={[
-                colors.palette.primary100,
-                colors.palette.secondary100,
-              ]}
-              onPress={() => handleSubmit()}
-              disabled={!isValid}
+          )}
+          RightAccessory={() => (
+            <TouchableOpacity
+              onPress={togglePasswordVisibility}
+              style={styles.iconButton}
             >
-              Sign in
-            </Button>
-            <TouchableOpacity style={{ alignSelf: 'center' }}>
-              <Text preset="bold">{'Forgotten Password?'}</Text>
+              <Ionicons
+                name={showPassword ? 'eye' : 'eye-off'}
+                size={26}
+                color={colors.palette.neutral400}
+              />
             </TouchableOpacity>
-          </View>
-        )}
-      </Formik>
+          )}
+          error={!!formik.errors.password && formik.touched.password}
+          errorText={
+            formik.touched.password ? formik.errors.password : undefined
+          }
+        />
+        <Button
+          preset="gradient"
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={handleContinuePress}
+          disabled={!formik.isValid || formik.isSubmitting}
+          isLoading={formik.isSubmitting}
+        >
+          Sign in
+        </Button>
+        <TouchableOpacity
+          style={styles.forgotPasswordButton}
+          onPress={() => {
+            // Handle forgot password navigation
+            // router.push('/forgot-password');
+          }}
+        >
+          <Text preset="bold">Forgotten Password?</Text>
+        </TouchableOpacity>
+      </View>
     </Screen>
   );
 }
@@ -133,11 +156,13 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginStart: 6,
   },
-  backContainer: {
-    flexDirection: 'row',
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  iconButton: {
+    alignSelf: 'center',
+    marginEnd: 12,
+  },
+  forgotPasswordButton: {
+    alignSelf: 'center',
+    marginTop: spacing.sm,
   },
   errorText: {
     color: colors.palette.error100,
