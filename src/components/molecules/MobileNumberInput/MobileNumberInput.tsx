@@ -31,13 +31,14 @@ const MobileNumberInputField = memo(
         () => [
           styles.inputContainer,
           {
-            borderColor: error
-              ? colors.palette.error100
-              : colors.palette.neutral200,
+            borderColor:
+              error && touched
+                ? colors.palette.error100
+                : colors.palette.neutral200,
             borderWidth: 3,
           },
         ],
-        [error],
+        [error, touched],
       );
 
       const dividerStyle = useMemo(

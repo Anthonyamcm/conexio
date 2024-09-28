@@ -12,20 +12,20 @@ export default function Stepper() {
   const showAlert = () => {
     if (state.currentStep === 0) {
       Alert.alert(
-        'Cancel creating account?',
-        'Are you sure you want to cancel creating an account',
+        'Do you want to stop creating your account?',
+        `if you stop now you'll loose any progress you've made.`,
         [
           {
-            text: `Yes i'm sure `,
+            text: `Stop creating account `,
             onPress: () => {
               clearFormData();
               router.back();
             },
-            style: 'cancel',
           },
           {
-            text: 'No continue',
+            text: 'Continue creating account',
             onPress: () => console.log('Here'),
+            style: 'cancel',
           },
         ],
         { cancelable: false }, // Prevents dismissing the alert by tapping outside

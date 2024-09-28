@@ -26,7 +26,7 @@ const createMobileSchema = (countryCode: string) =>
   });
 
 export default function Mobile() {
-  const { state, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep, setFormData } = useRegistration();
   const mobileRef = useRef<TextInput>(null);
   const [showCountryPicker, setShowCountryPicker] = useState<boolean>(false);
   const [countryCode, setCountryCode] = useState<ICountryCode>({
@@ -97,6 +97,7 @@ export default function Mobile() {
   );
 
   const emailPressed = useCallback(() => {
+    setFormData({ mobile: '' });
     router.push('/(registration)/email');
   }, [router]);
 

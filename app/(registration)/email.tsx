@@ -5,7 +5,7 @@ import { colors, spacing } from '@/src/utils';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useFormik } from 'formik';
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 import * as yup from 'yup';
 
@@ -22,10 +22,11 @@ interface FormValues {
 }
 
 export default function Email() {
-  const { state, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep, setFormData } = useRegistration();
   const emailRef = useRef<TextInput>(null);
 
   const mobilePressed = useCallback(() => {
+    setFormData({ email: '' });
     router.back();
   }, []);
 
@@ -33,13 +34,26 @@ export default function Email() {
   const formik = useFormik({
     initialValues: { email: state.formData.email || '' },
     validationSchema: emailSchema,
-    onSubmit: async (values: FormValues) => {
-      await handleSubmitStep(emailSchema, ['email'], {
-        ...values,
-        email: values.email,
-      });
+    onSubmit: async (values: FormValues, { setSubmitting }) => {
+      try {
+        await handleSubmitStep(emailSchema, ['email'], {
+          ...values,
+          email: values.email,
+        });
+      } catch (error) {
+        console.error('Error submitting mobile number:', error);
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
+
+  const iconColor = useMemo(() => {
+    if (formik.errors.email && formik.touched.email) {
+      return colors.palette.error100;
+    }
+    return colors.palette.neutral400;
+  }, [formik.errors.email, formik.touched.email]);
 
   // Memoized handlers to prevent unnecessary re-renders
   const handleContinuePress = useCallback(() => {
@@ -59,11 +73,7 @@ export default function Email() {
             <Ionicons
               name="mail"
               size={26}
-              color={
-                formik.errors.email && formik.touched.email
-                  ? colors.palette.error100
-                  : colors.palette.neutral400
-              }
+              color={iconColor}
               style={styles.icon}
             />
           )}
