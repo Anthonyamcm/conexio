@@ -1,22 +1,22 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
-import { Step } from '../../atoms';
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { ProgressBar } from '../../atoms'; // Assuming named export of ProgressBar
 
-export default function Stepper() {
+export default function ProgressHeader() {
   const { steps, prevStep, state, clearFormData } = useRegistration();
 
   const showAlert = () => {
     if (state.currentStep === 0) {
       Alert.alert(
         'Do you want to stop creating your account?',
-        `if you stop now you'll loose any progress you've made.`,
+        `If you stop now, you'll lose any progress you've made.`,
         [
           {
-            text: `Stop creating account `,
+            text: `Stop creating account`,
             onPress: () => {
               clearFormData();
               router.back();
@@ -35,28 +35,16 @@ export default function Stepper() {
     }
   };
 
-  // Memoize container style for steps
-  const stepContainerStyle = useMemo(
-    () => ({
-      flexDirection: 'row' as const,
-    }),
-    [],
-  );
-
   return (
     <View style={styles.stepperContainer}>
-      <TouchableOpacity onPress={showAlert}>
+      {/* Back Arrow */}
+      <TouchableOpacity onPress={showAlert} style={styles.backButton}>
         <Entypo name="chevron-left" size={32} color="black" />
       </TouchableOpacity>
-      <View style={stepContainerStyle}>
-        {steps.map((step, index) => (
-          <View
-            key={step}
-            style={{ marginRight: index < steps.length - 1 ? 15 : 0 }}
-          >
-            <Step index={index} />
-          </View>
-        ))}
+
+      {/* Progress Bar */}
+      <View style={styles.progressBarWrapper}>
+        <ProgressBar numberOfSteps={steps.length} />
       </View>
     </View>
   );
@@ -64,11 +52,16 @@ export default function Stepper() {
 
 const styles = StyleSheet.create({
   stepperContainer: {
-    flexDirection: 'row',
+    flexDirection: 'row', // Aligns the back arrow and progress bar horizontally
     width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: 'center', // Vertically aligns the back arrow and progress bar
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
+  },
+  backButton: {
+    paddingRight: spacing.md, // Adds some space between the back arrow and the progress bar
+  },
+  progressBarWrapper: {
+    flex: 1, // Makes the progress bar take up the remaining space
   },
 });
