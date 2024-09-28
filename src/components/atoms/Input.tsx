@@ -15,7 +15,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { colors, spacing, typography } from '@/src/utlis';
+import { colors, spacing, typography } from '@/src/utils';
 import { Text, TextProps } from './Text';
 
 export interface InputAccessoryProps {

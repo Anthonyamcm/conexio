@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { Button, Footer, Screen } from '@/src/components/atoms';
 import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { StyleSheet, View } from 'react-native';

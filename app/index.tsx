@@ -1,5 +1,5 @@
 import { Button, Screen, View } from '@/src/components/atoms';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import { router } from 'expo-router';
 
 //TODO Finish design

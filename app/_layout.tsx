@@ -11,7 +11,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/src/hooks/useColorScheme';
 import { AuthProvider } from '@/src/contexts/AuthContext';
-import { customFontsToLoad } from '@/src/utlis';
+import { customFontsToLoad } from '@/src/utils';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();

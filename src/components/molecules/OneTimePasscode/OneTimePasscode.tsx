@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { View } from 'react-native';
 import { Input, Text } from '../../atoms';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import useOneTimePasscode from './UseOneTimePasscode';
 
 interface OneTimePasscodeHandle {

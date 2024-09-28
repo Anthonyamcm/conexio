@@ -1,12 +1,12 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button, Footer, Input, Screen } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils'; // Corrected import path
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 // Yup validation schema for the name field
 const nameSchema = yup.object().shape({
@@ -17,38 +17,42 @@ const nameSchema = yup.object().shape({
     .max(32, 'Name is too long'),
 });
 
-// Define FormData type
-type FormValues = {
+// Define FormValues type
+interface FormValues {
   name: string;
-};
+}
 
 export default function Name() {
   const { state, handleSubmitStep } = useRegistration();
-  const nameRef = useRef<TextInput>(null);
-
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      await handleSubmitStep(nameSchema, ['name'], {
-        ...values,
-        name: values.name,
-      }); // Proceed to next step after validation
-    },
-    [handleSubmitStep],
-  );
 
   // Formik usage
   const formik = useFormik<FormValues>({
-    initialValues: { name: state.formData.name },
+    initialValues: { name: state.formData.name || '' },
     validationSchema: nameSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values) => {
+      await handleSubmitStep(nameSchema, ['name'], { name: values.name });
+    },
+    validateOnBlur: true,
+    validateOnChange: true,
   });
+
+  const iconColor = useMemo(() => {
+    if (formik.errors.name && formik.touched.name) {
+      return colors.palette.error100;
+    }
+    return colors.palette.neutral400;
+  }, [formik.errors.name, formik.touched.name]);
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
       <Header
         title="What's your name?"
-        subtitle="Enter the name on which you wish to be known as; this will be your display name"
+        subtitle="Enter the name by which you wish to be known; this will be your display name."
       />
       <View style={styles.formContainer}>
         <Input
@@ -57,27 +61,22 @@ export default function Name() {
             <Ionicons
               name="person"
               size={26}
-              color={
-                formik.errors.name
-                  ? colors.palette.error100
-                  : colors.palette.neutral400
-              }
+              color={iconColor}
               style={styles.icon}
             />
           )}
           value={formik.values.name}
           onChangeText={formik.handleChange('name')}
           onBlur={formik.handleBlur('name')}
-          ref={nameRef}
-          error={!!formik.errors.name}
-          errorText={formik.errors.name}
+          error={!!formik.errors.name && formik.touched.name}
+          errorText={formik.touched.name ? formik.errors.name : undefined}
         />
 
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
-          disabled={!formik.isValid || formik.isSubmitting}
+          onPress={handleContinuePress}
+          disabled={formik.isSubmitting || !formik.isValid}
           isLoading={formik.isSubmitting}
         >
           Continue
@@ -97,6 +96,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     gap: 15,
+    marginTop: spacing.md,
   },
   icon: {
     alignSelf: 'center',

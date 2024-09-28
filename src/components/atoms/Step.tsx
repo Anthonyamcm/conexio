@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import { View, StyleSheet, ViewStyle } from 'react-native';
 

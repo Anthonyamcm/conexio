@@ -1,4 +1,4 @@
-import { colors, typography } from '@/src/utlis';
+import { colors, typography } from '@/src/utils';
 import React, { useMemo } from 'react';
 import {
   StyleProp,

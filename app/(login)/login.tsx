@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Button, Input, Screen, Text } from '@/src/components/atoms';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import Feather from '@expo/vector-icons/Feather';
 import { Formik } from 'formik';
 import * as Yup from 'yup';

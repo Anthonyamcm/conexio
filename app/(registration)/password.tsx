@@ -6,7 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 
 // Yup validation schema for password
 const passwordSchema = yup.object().shape({

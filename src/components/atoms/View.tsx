@@ -1,4 +1,4 @@
-import { spacing } from '@/src/utlis';
+import { spacing } from '@/src/utils';
 import React, { useMemo } from 'react';
 import { StyleProp, ViewProps, ViewStyle, View as RNView } from 'react-native';
 

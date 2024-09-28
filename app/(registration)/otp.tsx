@@ -1,7 +1,7 @@
 import { Button, Footer, Screen, View } from '@/src/components/atoms';
 import { Header, OneTimePasscode } from '@/src/components/molecules';
 import { useRegistration, FormData } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import { useFormik } from 'formik';
 import { useCallback, useRef } from 'react';
 import { TextInput } from 'react-native-gesture-handler';

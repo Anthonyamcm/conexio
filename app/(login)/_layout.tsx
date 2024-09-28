@@ -1,6 +1,6 @@
 import { Screen } from '@/src/components/atoms';
 
-import { spacing } from '@/src/utlis';
+import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { Stack, router } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';

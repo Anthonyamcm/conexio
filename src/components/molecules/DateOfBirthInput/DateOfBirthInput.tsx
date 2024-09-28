@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import { View } from 'react-native';
 import { Input, Text } from '../../atoms';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import useDateOfBirthInput, {
   DateOfBirthInputReturnType,
 } from './useDateOfBirthInput';

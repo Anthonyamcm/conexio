@@ -13,7 +13,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { ExtendedEdge, colors, useSafeAreaInsetsStyle } from '@/src/utlis';
+import { ExtendedEdge, colors, useSafeAreaInsetsStyle } from '@/src/utils';
 
 interface BaseScreenProps {
   children?: React.ReactNode;

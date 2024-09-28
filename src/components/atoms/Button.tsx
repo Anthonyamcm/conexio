@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, typography } from '@/src/utlis';
+import { colors, spacing, typography } from '@/src/utils';
 
 type Presets = keyof typeof viewPresets;
 

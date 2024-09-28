@@ -8,77 +8,101 @@ import { Button, Footer, Screen } from '@/src/components/atoms';
 import { Header, MobileNumberInputField } from '@/src/components/molecules';
 import { ICountryCode } from '@/src/config';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing, typography } from '@/src/utlis';
-import { router } from 'expo-router';
+import { colors, spacing, typography } from '@/src/utils';
+import { useRouter } from 'expo-router';
 import { CountryPicker } from 'react-native-country-codes-picker';
 import { CountryCode } from 'libphonenumber-js/types';
 
-// Define the validation schema using Yup
-const mobileSchema = (countryCode: string) =>
+interface FormValues {
+  mobile: string;
+}
+
+// Define the validation schema factory using Yup
+const createMobileSchema = (countryCode: string) =>
   Yup.object().shape({
     mobile: Yup.string()
       .phone(countryCode as any, 'Please enter a valid phone number')
       .required('Mobile number is required'),
   });
 
-// Define types for form values
-interface FormValues {
-  mobile: string;
-}
-
 export default function Mobile() {
   const { state, handleSubmitStep } = useRegistration();
   const mobileRef = useRef<TextInput>(null);
-  const [show, setShow] = useState<boolean>(false);
+  const [showCountryPicker, setShowCountryPicker] = useState<boolean>(false);
   const [countryCode, setCountryCode] = useState<ICountryCode>({
     code: '+44',
     flag: '🇬🇧',
     country: 'GB',
   });
+  const router = useRouter();
 
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      console.log({ values });
-      const phoneNumber = parsePhoneNumber(countryCode.code + values.mobile);
-      await handleSubmitStep(mobileSchema(countryCode.country), ['mobile'], {
-        ...values,
-        mobile: phoneNumber.number,
-      });
+  // Formik usage
+  const formik = useFormik<FormValues>({
+    initialValues: { mobile: state.formData.mobile || '' },
+    validationSchema: createMobileSchema(countryCode.country),
+    validateOnChange: true,
+    validateOnBlur: true,
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        const phoneNumber = parsePhoneNumber(countryCode.code + values.mobile);
+        await handleSubmitStep(
+          createMobileSchema(countryCode.country),
+          ['mobile'],
+          {
+            ...values,
+            mobile: phoneNumber.number,
+          },
+        );
+      } catch (error) {
+        console.error('Error submitting mobile number:', error);
+      } finally {
+        setSubmitting(false);
+      }
     },
-    [countryCode, handleSubmitStep],
-  );
+  });
 
+  // Handle country code picker visibility
   const handleCountryCodePress = useCallback(() => {
     mobileRef.current?.blur();
-    setShow(true);
+    setShowCountryPicker(true);
   }, []);
 
-  const handleCountrySelect = useCallback((country: ICountryCode) => {
-    setCountryCode(country);
-    setShow(false);
-  }, []);
+  const handleCountrySelect = useCallback(
+    (country: ICountryCode) => {
+      setCountryCode(country);
+      setShowCountryPicker(false);
+      // Re-validate the mobile number with the new country code
+      formik.validateField('mobile');
+    },
+    [formik],
+  );
 
+  // Format phone number as user types
   const formatPhoneNumber = useCallback(
     (value: string) => {
       if (value.includes('(') && !value.includes(')')) {
         return value.replace('(', '');
       }
-      return new AsYouType(countryCode.country).input(value);
+      return new AsYouType(countryCode.country as CountryCode).input(value);
     },
-    [countryCode],
+    [countryCode.country],
+  );
+
+  const handleMobileChange = useCallback(
+    (text: string) => {
+      const formattedNumber = formatPhoneNumber(text);
+      formik.setFieldValue('mobile', formattedNumber);
+    },
+    [formatPhoneNumber, formik],
   );
 
   const emailPressed = useCallback(() => {
     router.push('/(registration)/email');
-  }, []);
+  }, [router]);
 
-  // Formik usage
-  const formik = useFormik<FormValues>({
-    initialValues: { mobile: state.formData.mobile || '' },
-    validationSchema: mobileSchema(countryCode.country),
-    onSubmit: handleSubmit,
-  });
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -88,25 +112,21 @@ export default function Mobile() {
       />
       <View style={styles.formContainer}>
         <MobileNumberInputField
+          ref={mobileRef}
           countryCode={countryCode}
           onCountryCodePress={handleCountryCodePress}
           value={formik.values.mobile}
-          onChangeText={(text) => {
-            const formattedNumber = formatPhoneNumber(text);
-            formik.setFieldValue('mobile', formattedNumber);
-          }}
-          containerStyle={{ flex: 1 }}
+          onChangeText={(text) => handleMobileChange(text)}
           onBlur={formik.handleBlur('mobile')}
-          ref={mobileRef}
-          showError={!!formik.errors.mobile && formik.touched.mobile}
+          error={formik.errors.mobile}
+          touched={formik.touched.mobile}
+          placeholder="Mobile number"
           accessibilityLabel="Mobile number input"
-          errorText={formik.errors.mobile}
-          touched={formik.touched as { mobile: boolean }}
         />
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
+          onPress={handleContinuePress}
           disabled={!formik.isValid || formik.isSubmitting}
           isLoading={formik.isSubmitting}
         >
@@ -123,8 +143,8 @@ export default function Mobile() {
       <Footer />
       <CountryPicker
         lang="en"
-        show={show}
-        onBackdropPress={() => setShow(false)}
+        show={showCountryPicker}
+        onBackdropPress={() => setShowCountryPicker(false)}
         style={countryPickerStyles}
         pickerButtonOnPress={(item) => {
           handleCountrySelect({
@@ -132,7 +152,6 @@ export default function Mobile() {
             flag: item.flag,
             country: item.code as CountryCode,
           });
-          setShow(false);
         }}
       />
     </Screen>
@@ -148,6 +167,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     gap: 15,
+    marginTop: spacing.md,
   },
 });
 

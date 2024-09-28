@@ -8,7 +8,7 @@ import React, {
 import { Button, Footer, Input, Screen } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utlis';
+import { colors, spacing } from '@/src/utils';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
