@@ -42,7 +42,7 @@ export default function Username() {
     validationSchema: usernameSchema,
     validateOnBlur: true,
     validateOnChange: true,
-    onSubmit: async (values, { setSubmitting, setErrors }) => {
+    onSubmit: async (values: FormValues, { setSubmitting, setErrors }) => {
       try {
         setIsChecking(true);
         const available = await checkUsernameAvailability(values.username);

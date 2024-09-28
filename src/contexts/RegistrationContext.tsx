@@ -174,14 +174,13 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
     fieldsToValidate: string[],
     formData: Partial<FormData>,
   ): Promise<void> => {
+    console.log({ formData });
     const isValid = await validateStep(
       validationSchema,
       fieldsToValidate,
       formData,
     );
-    console.log({ isValid });
     if (isValid) {
-      console.log({ formData });
       setFormData(formData);
       goToNextScreen();
       nextStep();

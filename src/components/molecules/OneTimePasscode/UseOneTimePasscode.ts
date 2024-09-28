@@ -1,74 +1,70 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRef, useCallback } from 'react';
 import {
-  Keyboard,
-  NativeSyntheticEvent,
   TextInput,
+  NativeSyntheticEvent,
   TextInputKeyPressEventData,
 } from 'react-native';
 
-// Define TypeScript types for the hook's parameters and return values
-type SetFieldFunction = (field: string, value: string) => void;
-type SetTouchedFunction = (field: string, isTouched: boolean) => void;
-
-interface UseOneTimePasscodeProps {
-  inputRefs: React.MutableRefObject<(TextInput | null)[]>;
-  inputs: string[];
-  handleInputChange: (index: number, text: string) => void;
-  handleKeyPress: (
-    index: number,
-    e: NativeSyntheticEvent<TextInputKeyPressEventData>,
-  ) => void;
+export interface OneTimePasscodeHandle {
+  reset: () => void;
 }
 
-// Custom hook for handling OTP input
-const useOneTimePasscode = (
-  setFieldValue: SetFieldFunction,
-  setFieldTouched: SetTouchedFunction,
-): UseOneTimePasscodeProps => {
-  const inputRefs = useRef<TextInput[]>(Array(6).fill(null));
-  const [inputs, setInputs] = useState<string[]>(Array(6).fill(''));
+const OTP_LENGTH = 6;
 
-  useEffect(() => {
-    if (inputs.every((input) => input.length === 1)) {
-      const code = inputs.join('');
-      setFieldTouched('OTP', true);
-      setFieldValue('OTP', code);
-      Keyboard.dismiss();
-    }
-  }, [inputs, setFieldTouched, setFieldValue]);
+export default function useOneTimePasscode(
+  value: string,
+  onChange: (value: string) => void,
+) {
+  const inputRefs = useRef<Array<TextInput | null>>([]);
 
-  const handleInputChange = useCallback((index: number, text: string) => {
-    setInputs((prevInputs) => {
-      const newInputs = [...prevInputs];
-      newInputs[index] = text;
+  const codeDigits = Array.from(
+    { length: OTP_LENGTH },
+    (_, i) => value[i] || '',
+  );
 
-      if (text.length === 1 && index < inputRefs.current.length - 1) {
+  const handleChange = useCallback(
+    (text: string, index: number) => {
+      const newValue = value.split('');
+      newValue[index] = text;
+      const updatedValue = newValue.join('');
+
+      onChange(updatedValue);
+
+      if (text && index < OTP_LENGTH - 1) {
         inputRefs.current[index + 1]?.focus();
       }
-
-      return newInputs;
-    });
-  }, []);
+    },
+    [onChange, value],
+  );
 
   const handleKeyPress = useCallback(
-    (index: number, e: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-      if (
-        e.nativeEvent.key === 'Backspace' &&
-        inputs[index].length === 0 &&
-        index > 0
-      ) {
-        inputRefs.current[index - 1]?.focus();
+    (e: NativeSyntheticEvent<TextInputKeyPressEventData>, index: number) => {
+      if (e.nativeEvent.key === 'Backspace') {
+        if (value[index]) {
+          const newValue = value.split('');
+          newValue[index] = '';
+          onChange(newValue.join(''));
+        } else if (index > 0) {
+          inputRefs.current[index - 1]?.focus();
+          const newValue = value.split('');
+          newValue[index - 1] = '';
+          onChange(newValue.join(''));
+        }
       }
     },
-    [inputs],
+    [onChange, value],
   );
+
+  const resetFields = useCallback(() => {
+    onChange('');
+    inputRefs.current[0]?.focus();
+  }, [onChange]);
 
   return {
     inputRefs,
-    inputs,
-    handleInputChange,
+    codeDigits,
+    handleChange,
     handleKeyPress,
+    resetFields,
   };
-};
-
-export default useOneTimePasscode;
+}

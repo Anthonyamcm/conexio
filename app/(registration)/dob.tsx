@@ -35,7 +35,7 @@ export default function Dob() {
       dob: state.formData.dob || null,
     },
     validationSchema: dobSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values: FormValues) => {
       await handleSubmitStep(dobSchema, ['dob'], { dob: values.dob });
     },
   });

@@ -22,19 +22,8 @@ interface FormValues {
 }
 
 export default function Email() {
-  const { state, setFormData, handleSubmitStep } = useRegistration();
+  const { state, handleSubmitStep } = useRegistration();
   const emailRef = useRef<TextInput>(null);
-
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      await handleSubmitStep(emailSchema, ['email'], {
-        ...values,
-        email: values.email,
-      });
-    },
-    [setFormData, handleSubmitStep],
-  );
 
   const mobilePressed = useCallback(() => {
     router.back();
@@ -44,8 +33,18 @@ export default function Email() {
   const formik = useFormik({
     initialValues: { email: state.formData.email || '' },
     validationSchema: emailSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values: FormValues) => {
+      await handleSubmitStep(emailSchema, ['email'], {
+        ...values,
+        email: values.email,
+      });
+    },
   });
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -79,7 +78,7 @@ export default function Email() {
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
+          onPress={handleContinuePress}
           disabled={!formik.isValid || formik.isSubmitting}
           isLoading={formik.isSubmitting}
         >

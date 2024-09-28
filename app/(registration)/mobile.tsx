@@ -42,7 +42,7 @@ export default function Mobile() {
     validationSchema: createMobileSchema(countryCode.country),
     validateOnChange: true,
     validateOnBlur: true,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values: FormValues, { setSubmitting }) => {
       try {
         const phoneNumber = parsePhoneNumber(countryCode.code + values.mobile);
         await handleSubmitStep(

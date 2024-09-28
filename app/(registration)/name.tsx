@@ -29,8 +29,14 @@ export default function Name() {
   const formik = useFormik<FormValues>({
     initialValues: { name: state.formData.name || '' },
     validationSchema: nameSchema,
-    onSubmit: async (values) => {
-      await handleSubmitStep(nameSchema, ['name'], { name: values.name });
+    onSubmit: async (values, { setSubmitting }) => {
+      try {
+        await handleSubmitStep(nameSchema, ['name'], { name: values.name });
+      } catch (error) {
+        console.error('Error submitting name', error);
+      } finally {
+        setSubmitting(false);
+      }
     },
     validateOnBlur: true,
     validateOnChange: true,
