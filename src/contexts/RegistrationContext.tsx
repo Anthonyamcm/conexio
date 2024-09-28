@@ -5,9 +5,9 @@ import React, {
   useCallback,
   ReactNode,
 } from 'react';
-import * as yup from 'yup';
+import * as Yup from 'yup';
 import { validateSchemaPartially } from '../lib/helpers';
-import { router } from 'expo-router';
+import { Href, useRouter } from 'expo-router';
 
 // Define the shape of the form data
 export interface FormData {
@@ -24,7 +24,7 @@ export interface FormData {
 interface RegistrationState {
   currentStep: number;
   formData: FormData;
-  errors: { [key: string]: string };
+  errors: Record<string, string>;
 }
 
 const initialState: RegistrationState = {
@@ -44,10 +44,10 @@ const initialState: RegistrationState = {
 // Define action types
 type RegistrationAction =
   | { type: 'SET_FORM_DATA'; payload: Partial<FormData> }
-  | { type: 'SET_ERRORS'; payload: { [key: string]: string } }
+  | { type: 'SET_ERRORS'; payload: Record<string, string> }
   | { type: 'NEXT_STEP' }
   | { type: 'PREV_STEP' }
-  | { type: 'CLEAR_FORM_DATA' }; // New action
+  | { type: 'CLEAR_FORM_DATA' };
 
 // Reducer function
 const registrationReducer = (
@@ -75,10 +75,12 @@ const registrationReducer = (
       return { ...state, currentStep: state.currentStep + 1 };
     case 'PREV_STEP':
       return { ...state, currentStep: state.currentStep - 1 };
-    case 'CLEAR_FORM_DATA': // Handle clearing form data
+    case 'CLEAR_FORM_DATA':
       return {
         ...state,
         formData: initialState.formData,
+        errors: {},
+        currentStep: 0,
       };
     default:
       return state;
@@ -90,15 +92,15 @@ interface RegistrationContextProps {
   state: RegistrationState;
   steps: string[];
   setFormData: (newData: Partial<FormData>) => void;
-  setErrors: (newErrors: { [key: string]: string }) => void;
+  setErrors: (newErrors: Record<string, string>) => void;
   validateStep: (
-    validationSchema: yup.ObjectSchema<any>,
-    fieldsToValidate: string[],
+    validationSchema: Yup.ObjectSchema<any>,
+    fieldsToValidate: Array<keyof FormData>,
     dataToValidate: Partial<FormData>,
   ) => Promise<boolean>;
   handleSubmitStep: (
-    validationSchema: yup.ObjectSchema<any>,
-    fieldsToValidate: string[],
+    validationSchema: Yup.ObjectSchema<any>,
+    fieldsToValidate: Array<keyof FormData>,
     formData: Partial<FormData>,
   ) => Promise<void>;
   nextStep: () => void;
@@ -106,49 +108,54 @@ interface RegistrationContextProps {
   clearFormData: () => void;
 }
 
-interface RegistrationProviderProps {
-  children: ReactNode;
-}
-
 // Create context
 const RegistrationContext = createContext<RegistrationContextProps | undefined>(
   undefined,
 );
+
+interface RegistrationProviderProps {
+  children: ReactNode;
+}
 
 // RegistrationProvider component
 export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(registrationReducer, initialState);
-  const steps: string[] = [
-    'name',
-    'username',
-    'dob',
-    'mobile',
-    'otp',
-    'password',
-  ];
-
-  const clearFormData = () => {
-    dispatch({ type: 'CLEAR_FORM_DATA' });
-  };
+  const router = useRouter();
+  const steps = ['Mobile', 'OTP', 'Name', 'Username', 'DOB', 'Password'];
 
   // Function to update form data
-  const setFormData = (newData: Partial<FormData>) => {
-    console.log({ newData });
+  const setFormData = useCallback((newData: Partial<FormData>) => {
     dispatch({ type: 'SET_FORM_DATA', payload: newData });
-  };
+  }, []);
 
   // Function to update errors
-  const setErrors = (newErrors: { [key: string]: string }) => {
+  const setErrors = useCallback((newErrors: Record<string, string>) => {
     dispatch({ type: 'SET_ERRORS', payload: newErrors });
-  };
+  }, []);
+
+  // Function to navigate to the next step
+  const nextStep = useCallback(() => {
+    dispatch({ type: 'NEXT_STEP' });
+  }, []);
+
+  // Function to navigate to the previous step
+  const prevStep = useCallback(() => {
+    dispatch({ type: 'PREV_STEP' });
+    router.back();
+  }, [router]);
+
+  // Function to clear form data
+  const clearFormData = useCallback(() => {
+    dispatch({ type: 'CLEAR_FORM_DATA' });
+  }, []);
 
   // Function to validate a step
   const validateStep = useCallback(
     async (
-      validationSchema: yup.ObjectSchema<any>,
-      fieldsToValidate: string[],
+      validationSchema: Yup.ObjectSchema<any>,
+      fieldsToValidate: Array<keyof FormData>,
       dataToValidate: Partial<FormData>,
     ): Promise<boolean> => {
       const errors = await validateSchemaPartially(
@@ -160,66 +167,52 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
         setErrors({});
         return true;
       } else {
-        console.log({ errors });
         setErrors(errors);
         return false;
       }
     },
-    [state.formData],
+    [setErrors],
   );
 
+  // Function to navigate to the appropriate screen
+  const goToNextScreen = useCallback(() => {
+    const stepRoutes: { [key: number]: Href<string | object> } = {
+      0: '/(registration)/otp',
+      1: '/(registration)/name',
+      2: '/(registration)/username',
+      3: '/(registration)/dob',
+      4: '/(registration)/password',
+    };
+
+    const nextRoute = stepRoutes[state.currentStep];
+    if (nextRoute) {
+      router.push(nextRoute);
+    } else {
+      // If all steps are completed, navigate to the final screen or home
+      router.push('/');
+    }
+  }, [router, state.currentStep]);
+
   // Function to handle submitting the step
-  const handleSubmitStep = async (
-    validationSchema: yup.ObjectSchema<any>,
-    fieldsToValidate: string[],
-    formData: Partial<FormData>,
-  ): Promise<void> => {
-    console.log({ formData });
-    const isValid = await validateStep(
-      validationSchema,
-      fieldsToValidate,
-      formData,
-    );
-    if (isValid) {
-      setFormData(formData);
-      goToNextScreen();
-      nextStep();
-    }
-  };
-
-  // Function to navigate to the next step
-  const nextStep = () => {
-    dispatch({ type: 'NEXT_STEP' });
-  };
-
-  // Function to navigate to the previous step
-  const prevStep = () => {
-    dispatch({ type: 'PREV_STEP' });
-    router.back();
-  };
-
-  const goToNextScreen = (): void => {
-    switch (state.currentStep) {
-      case 0:
-        router.push('/(registration)/otp');
-        break;
-      case 1:
-        router.push('/(registration)/name');
-        break;
-      case 2:
-        router.push('/(registration)/username');
-        break;
-      case 3:
-        router.push('/(registration)/dob');
-        break;
-      case 4:
-        router.push('/(registration)/password');
-        break;
-      default:
-        router.push('/(registration)/mobile');
-        break;
-    }
-  };
+  const handleSubmitStep = useCallback(
+    async (
+      validationSchema: Yup.ObjectSchema<any>,
+      fieldsToValidate: Array<keyof FormData>,
+      formData: Partial<FormData>,
+    ): Promise<void> => {
+      const isValid = await validateStep(
+        validationSchema,
+        fieldsToValidate,
+        formData,
+      );
+      if (isValid) {
+        setFormData(formData);
+        nextStep();
+        goToNextScreen();
+      }
+    },
+    [validateStep, setFormData, nextStep, goToNextScreen, state.currentStep],
+  );
 
   return (
     <RegistrationContext.Provider
