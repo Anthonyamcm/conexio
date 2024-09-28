@@ -1,4 +1,5 @@
-import { Text, View } from '../../atoms';
+import { View } from 'react-native';
+import { Text } from '../../atoms';
 
 interface HeaderProps {
   title: string;
@@ -7,7 +8,7 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <View preset={'column'} style={{ paddingBottom: 10 }}>
+    <View style={{ paddingBottom: 10, flexDirection: 'column' }}>
       <Text preset={'subheading'} weight="medium">
         {title}
       </Text>

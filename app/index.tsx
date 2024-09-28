@@ -1,6 +1,7 @@
-import { Button, Screen, View } from '@/src/components/atoms';
+import { Button, Screen } from '@/src/components/atoms';
 import { colors, spacing } from '@/src/utils';
 import { router } from 'expo-router';
+import { StyleSheet, View } from 'react-native';
 
 //TODO Finish design
 
@@ -23,7 +24,7 @@ export default function Home() {
         padding: spacing.lg,
       }}
     >
-      <View preset={'column'}>
+      <View style={style.column}>
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
@@ -38,3 +39,10 @@ export default function Home() {
     </Screen>
   );
 }
+
+const style = StyleSheet.create({
+  column: {
+    flexDirection: 'column',
+    gap: 15,
+  },
+});

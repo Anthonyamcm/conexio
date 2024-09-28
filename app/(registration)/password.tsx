@@ -1,17 +1,20 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Button, Footer, Input, Screen } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
+import { colors, spacing } from '@/src/utils';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFormik } from 'formik';
-import * as yup from 'yup';
-import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { colors, spacing } from '@/src/utils';
+import * as Yup from 'yup';
 
-// Yup validation schema for password
-const passwordSchema = yup.object().shape({
-  password: yup
-    .string()
+interface FormValues {
+  password: string;
+  confirmPassword: string;
+}
+
+const passwordSchema = Yup.object().shape({
+  password: Yup.string()
     .required('Password is required')
     .min(8, 'Password must be at least 8 characters')
     .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
@@ -21,64 +24,60 @@ const passwordSchema = yup.object().shape({
       /[@$!%*#?&]/,
       'Password must contain at least one special character',
     ),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords must match')
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords must match')
     .required('Confirm your password'),
 });
 
-// Form values type definition
-type FormValues = {
-  password: string;
-  confirmPassword: string;
-};
-
 export default function Password() {
-  const { state, handleSubmitStep } = useRegistration();
-  const passwordRef = useRef<TextInput>(null);
-  const confirmPasswordRef = useRef<TextInput>(null);
+  const { handleSubmitStep } = useRegistration();
 
-  // Toggle password visibility hook
-  function usePasswordToggle() {
-    const [visible, setVisible] = useState(false);
-    const toggleVisibility = () => setVisible(!visible);
-    return { visible, toggleVisibility };
-  }
+  // Toggle password visibility
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
-  const passwordToggle = usePasswordToggle();
-  const confirmPasswordToggle = usePasswordToggle();
+  const togglePasswordVisibility = useCallback(() => {
+    setPasswordVisible((prev) => !prev);
+  }, []);
 
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      // Proceed to next step after validation
-      await handleSubmitStep(passwordSchema, ['password'], {
-        ...values,
-        password: values.password,
-      });
-    },
-    [handleSubmitStep],
-  );
+  const toggleConfirmPasswordVisibility = useCallback(() => {
+    setConfirmPasswordVisible((prev) => !prev);
+  }, []);
 
-  // Formik usage
   const formik = useFormik<FormValues>({
     initialValues: {
       password: '',
       confirmPassword: '',
     },
     validationSchema: passwordSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values: FormValues, { setSubmitting }) => {
+      try {
+        await handleSubmitStep(passwordSchema, ['password'], {
+          password: values.password,
+        });
+      } catch (error) {
+        console.error('Error submitting password:', error);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    validateOnChange: true,
+    validateOnBlur: true,
   });
 
-  // Helper function to determine icon color
-  const iconColor = (
-    error: string | undefined,
-    touched: boolean | undefined,
-  ) => {
-    return error && touched
-      ? colors.palette.error100
-      : colors.palette.neutral400;
-  };
+  const getIconColor = useCallback(
+    (fieldName: keyof FormValues) => {
+      return formik.errors[fieldName] && formik.touched[fieldName]
+        ? colors.palette.error100
+        : colors.palette.neutral400;
+    },
+    [formik.errors, formik.touched],
+  );
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -89,22 +88,22 @@ export default function Password() {
       <View style={styles.formContainer}>
         <Input
           placeholder="Password"
-          secureTextEntry={!passwordToggle.visible}
+          secureTextEntry={!passwordVisible}
           LeftAccessory={() => (
             <Ionicons
               name="lock-closed"
               size={26}
-              color={iconColor(formik.errors.password, formik.touched.password)}
+              color={getIconColor('password')}
               style={styles.icon}
             />
           )}
           RightAccessory={() => (
             <TouchableOpacity
-              onPress={passwordToggle.toggleVisibility}
-              style={[styles.icon, { marginEnd: 12 }]}
+              onPress={togglePasswordVisibility}
+              style={styles.iconButton}
             >
               <Ionicons
-                name={passwordToggle.visible ? 'eye' : 'eye-off'}
+                name={passwordVisible ? 'eye' : 'eye-off'}
                 size={26}
                 color={colors.palette.neutral400}
               />
@@ -113,32 +112,30 @@ export default function Password() {
           value={formik.values.password}
           onChangeText={formik.handleChange('password')}
           onBlur={formik.handleBlur('password')}
-          ref={passwordRef}
           error={!!formik.errors.password && formik.touched.password}
-          errorText={formik.errors.password}
+          errorText={
+            formik.touched.password ? formik.errors.password : undefined
+          }
         />
 
         <Input
           placeholder="Confirm Password"
-          secureTextEntry={!confirmPasswordToggle.visible}
+          secureTextEntry={!confirmPasswordVisible}
           LeftAccessory={() => (
             <Ionicons
               name="lock-closed"
               size={26}
-              color={iconColor(
-                formik.errors.confirmPassword,
-                formik.touched.confirmPassword,
-              )}
+              color={getIconColor('confirmPassword')}
               style={styles.icon}
             />
           )}
           RightAccessory={() => (
             <TouchableOpacity
-              onPress={confirmPasswordToggle.toggleVisibility}
-              style={[styles.icon, { marginEnd: 12 }]}
+              onPress={toggleConfirmPasswordVisibility}
+              style={styles.iconButton}
             >
               <Ionicons
-                name={confirmPasswordToggle.visible ? 'eye' : 'eye-off'}
+                name={confirmPasswordVisible ? 'eye' : 'eye-off'}
                 size={26}
                 color={colors.palette.neutral400}
               />
@@ -147,18 +144,21 @@ export default function Password() {
           value={formik.values.confirmPassword}
           onChangeText={formik.handleChange('confirmPassword')}
           onBlur={formik.handleBlur('confirmPassword')}
-          ref={confirmPasswordRef}
           error={
             !!formik.errors.confirmPassword && formik.touched.confirmPassword
           }
-          errorText={formik.errors.confirmPassword}
+          errorText={
+            formik.touched.confirmPassword
+              ? formik.errors.confirmPassword
+              : undefined
+          }
         />
 
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
-          disabled={!formik.isValid || formik.isSubmitting}
+          onPress={handleContinuePress}
+          disabled={formik.isSubmitting || !formik.isValid}
           isLoading={formik.isSubmitting}
         >
           Continue
@@ -183,5 +183,9 @@ const styles = StyleSheet.create({
   icon: {
     alignSelf: 'center',
     marginStart: 6,
+  },
+  iconButton: {
+    alignSelf: 'center',
+    marginEnd: 12,
   },
 });
