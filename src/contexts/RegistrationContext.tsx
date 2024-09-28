@@ -12,7 +12,7 @@ import { router } from 'expo-router';
 // Define the shape of the form data
 export interface FormData {
   name: string;
-  dob: Date;
+  dob: Date | null;
   email?: string;
   mobile?: string;
   OTP: string;
@@ -31,7 +31,7 @@ const initialState: RegistrationState = {
   currentStep: 0,
   formData: {
     name: '',
-    dob: new Date(),
+    dob: null,
     email: '',
     mobile: '',
     OTP: '',

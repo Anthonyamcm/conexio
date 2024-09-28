@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Button, Footer, Screen } from '@/src/components/atoms';
 import { DateOfBirthInput, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
@@ -7,63 +7,43 @@ import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { StyleSheet, View } from 'react-native';
 
-// Yup validation schema for Date of Birth
+const today = new Date();
+const minDate = new Date(1900, 0, 1);
+const maxDate = new Date(
+  today.getFullYear() - 16,
+  today.getMonth(),
+  today.getDate(),
+);
+
 const dobSchema = yup.object().shape({
-  dob: yup.object().shape({
-    day: yup
-      .number()
-      .required('Day is required')
-      .min(1, 'Invalid day')
-      .max(31, 'Invalid day'),
-    month: yup
-      .number()
-      .required('Month is required')
-      .min(1, 'Invalid month')
-      .max(12, 'Invalid month'),
-    year: yup
-      .number()
-      .required('Year is required')
-      .min(1900, 'Year is too early')
-      .max(new Date().getFullYear(), 'Year is too far in the future'),
-  }),
+  dob: yup
+    .date()
+    .required('Date of birth is required')
+    .min(minDate, 'Year is too early')
+    .max(maxDate, 'You must be at least 16 years old'),
 });
 
-// Define form values type
-type FormValues = {
-  dob: {
-    day: string;
-    month: string;
-    year: string;
-  };
-};
+interface FormValues {
+  dob: Date | null;
+}
 
 export default function Dob() {
   const { state, handleSubmitStep } = useRegistration();
 
-  // Handle form submission
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      const dateString = `${values.dob.year}-${values.dob.month}-${values.dob.day}`;
-      const parsedDate = new Date(dateString);
-
-      // Call the handleSubmitStep with form data and proceed
-      await handleSubmitStep(dobSchema, ['dob'], { dob: parsedDate });
-    },
-    [handleSubmitStep],
-  );
-
-  // Formik usage
   const formik = useFormik<FormValues>({
     initialValues: {
-      dob: {
-        day: state.formData.dob?.getDate().toString() || '',
-        month: (state.formData.dob?.getMonth() + 1).toString() || '',
-        year: state.formData.dob?.getFullYear().toString() || '',
-      },
+      dob: state.formData.dob || null,
     },
     validationSchema: dobSchema,
-    onSubmit: handleSubmit,
+    onSubmit: async (values) => {
+      await handleSubmitStep(dobSchema, ['dob'], { dob: values.dob });
+    },
   });
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -74,26 +54,17 @@ export default function Dob() {
       <View style={styles.formContainer}>
         <DateOfBirthInput
           value={formik.values.dob}
-          setFieldValue={formik.setFieldValue}
-          setFieldTouched={formik.setFieldTouched}
-          setFieldError={formik.setFieldError}
-          touched={{
-            day: formik.touched.dob?.day || false,
-            month: formik.touched.dob?.month || false,
-            year: formik.touched.dob?.year || false,
-          }}
-          errors={{
-            day: formik.errors.dob?.day,
-            month: formik.errors.dob?.month,
-            year: formik.errors.dob?.year,
-          }}
+          onChange={(date) => formik.setFieldValue('dob', date)}
+          error={formik.errors.dob}
+          touched={formik.touched.dob}
+          onBlur={() => formik.setFieldTouched('dob', true)}
         />
 
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
-          disabled={!formik.isValid || formik.isSubmitting}
+          onPress={handleContinuePress}
+          disabled={formik.isSubmitting || !formik.isValid}
           isLoading={formik.isSubmitting}
         >
           Continue
@@ -112,6 +83,6 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     flexDirection: 'column',
-    gap: 15,
+    gap: 10,
   },
 });

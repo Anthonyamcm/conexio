@@ -1,6 +1,5 @@
-import { DateField } from '@/src/config'; // Assuming DateField is 'day' | 'month' | 'year'
-import { isValidDay, isValidMonth, isValidYear } from '@/src/lib'; // Added isValidYear for completeness
-import { useState, useCallback, useRef, RefObject, useEffect } from 'react';
+import { DateField } from '@/src/config';
+import { useState, useCallback, useRef, RefObject, useMemo } from 'react';
 import {
   TextInput,
   Keyboard,
@@ -8,17 +7,14 @@ import {
   TextInputKeyPressEventData,
 } from 'react-native';
 
-// Type for the date object
-type DobDate = {
+interface DobDate {
   day: string;
   month: string;
   year: string;
-};
+}
 
-// Custom return type for the hook
 export interface DateOfBirthInputReturnType {
-  date: DobDate;
-  isComplete: boolean;
+  dateParts: DobDate;
   handleChange: (field: DateField, value: string) => void;
   handleKeyPress: (
     e: NativeSyntheticEvent<TextInputKeyPressEventData>,
@@ -32,8 +28,8 @@ export interface DateOfBirthInputReturnType {
 }
 
 const useDateOfBirthInput = (
-  setFieldValue: (field: string, value: string | Date) => void,
-  setFieldError: (field: string, errorMsg: string) => void, // Added for inline error setting
+  value: Date | null,
+  onChange: (date: Date | null) => void,
   dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY/MM/DD' = 'DD/MM/YYYY',
 ): DateOfBirthInputReturnType => {
   // Refs for managing input fields
@@ -41,124 +37,136 @@ const useDateOfBirthInput = (
   const monthInputRef = useRef<TextInput>(null);
   const yearInputRef = useRef<TextInput>(null);
 
-  // Store refs for easier navigation
-  const fieldRefs = {
-    day: dayInputRef,
-    month: monthInputRef,
-    year: yearInputRef,
-  };
-
   // Map to define input field order based on date format
-  const formatMap: Record<
-    'MM/DD/YYYY' | 'DD/MM/YYYY' | 'YYYY/MM/DD',
-    Array<DateField>
-  > = {
-    'MM/DD/YYYY': ['month', 'day', 'year'],
-    'DD/MM/YYYY': ['day', 'month', 'year'],
-    'YYYY/MM/DD': ['year', 'month', 'day'],
-  };
+  const formatMap = useMemo(
+    () => ({
+      'MM/DD/YYYY': ['month', 'day', 'year'] as DateField[],
+      'DD/MM/YYYY': ['day', 'month', 'year'] as DateField[],
+      'YYYY/MM/DD': ['year', 'month', 'day'] as DateField[],
+    }),
+    [],
+  );
 
-  // State to manage date values
-  const [date, setDate] = useState<DobDate>({ day: '', month: '', year: '' });
+  // Store refs for easier navigation
+  const fieldRefs = useMemo(
+    () => ({
+      day: dayInputRef,
+      month: monthInputRef,
+      year: yearInputRef,
+    }),
+    [],
+  );
 
-  // Determine if all fields are valid and filled
-  const isComplete =
-    date.day.length === 2 && date.month.length === 2 && date.year.length === 4;
+  // Map to define maxLength for each field
+  const maxLengthMap = useMemo(
+    () => ({
+      day: 2,
+      month: 2,
+      year: 4,
+    }),
+    [],
+  );
 
-  // Update Formik state when date input is complete and valid
-  useEffect(() => {
-    if (isComplete) {
-      const { day, month, year } = date;
-      const dateString = `${year}-${month}-${day}`;
-      const parsedDate = new Date(dateString);
-
-      if (!isNaN(parsedDate.getTime())) {
-        setFieldValue('dob', parsedDate); // Update with Date object
-        Keyboard.dismiss();
-      } else {
-        setFieldError('dob', 'Invalid date'); // Set form error if date is invalid
-      }
+  // Initialize date parts from the provided value
+  const [dateParts, setDateParts] = useState<DobDate>(() => {
+    if (value) {
+      const day = value.getDate().toString().padStart(2, '0');
+      const month = (value.getMonth() + 1).toString().padStart(2, '0');
+      const year = value.getFullYear().toString();
+      return { day, month, year };
     }
-  }, [isComplete, date, setFieldValue, setFieldError]);
+    return { day: '', month: '', year: '' };
+  });
 
   // Helper to get next field ref in the format order
-  const getNextFieldRef = (
-    field: DateField,
-  ): RefObject<TextInput> | undefined => {
-    const currentIndex = formatMap[dateFormat].indexOf(field);
-    const nextField =
-      currentIndex < 2 ? formatMap[dateFormat][currentIndex + 1] : null;
-    return nextField ? fieldRefs[nextField] : undefined;
-  };
+  const getNextFieldRef = useCallback(
+    (field: DateField): RefObject<TextInput> | undefined => {
+      const currentIndex = formatMap[dateFormat].indexOf(field);
+      const nextField =
+        currentIndex < 2 ? formatMap[dateFormat][currentIndex + 1] : null;
+      return nextField ? fieldRefs[nextField] : undefined;
+    },
+    [dateFormat, formatMap, fieldRefs],
+  );
 
-  // Helper to get previous field ref in the format order
-  const getPrevFieldRef = (
-    field: DateField,
-  ): RefObject<TextInput> | undefined => {
-    const currentIndex = formatMap[dateFormat].indexOf(field);
-    const prevField =
-      currentIndex > 0 ? formatMap[dateFormat][currentIndex - 1] : null;
-    return prevField ? fieldRefs[prevField] : undefined;
-  };
-
-  // Handle changes in input fields and validate them
+  // Handle changes in input fields and update dateParts
   const handleChange = useCallback(
     (field: DateField, value: string) => {
-      setDate((prev) => {
-        const newDate = { ...prev, [field]: value };
-
-        // Field-specific validation and error messaging
-        if (
-          field === 'day' &&
-          value.length === 2 &&
-          !isValidDay(value, newDate.month, newDate.year)
-        ) {
-          setFieldError('dob.day', 'Invalid day');
-        }
-        if (field === 'month' && value.length === 2 && !isValidMonth(value)) {
-          setFieldError('dob.month', 'Invalid month');
-        }
-        if (field === 'year' && value.length === 4 && !isValidYear(value)) {
-          setFieldError('dob.year', 'Invalid year');
-        }
-
-        return newDate;
-      });
-
-      // Focus management based on input length
-      if (value.length === 2 && field !== 'year') {
-        const nextField = getNextFieldRef(field);
-        nextField?.current?.focus();
-      } else if (value.length === 0 && field !== 'day') {
-        const prevField = getPrevFieldRef(field);
-        prevField?.current?.focus();
+      const fieldMaxLength = maxLengthMap[field];
+      if (value.length > fieldMaxLength) {
+        value = value.slice(0, fieldMaxLength);
       }
+
+      setDateParts((prev) => {
+        const newDateParts = { ...prev, [field]: value };
+
+        // When all fields have the required length, attempt to parse the date
+        if (
+          newDateParts.day.length === maxLengthMap['day'] &&
+          newDateParts.month.length === maxLengthMap['month'] &&
+          newDateParts.year.length === maxLengthMap['year']
+        ) {
+          const { day, month, year } = newDateParts;
+          const parsedDate = new Date(
+            Number(year),
+            Number(month) - 1,
+            Number(day),
+          );
+
+          if (
+            parsedDate.getFullYear() === Number(year) &&
+            parsedDate.getMonth() === Number(month) - 1 &&
+            parsedDate.getDate() === Number(day)
+          ) {
+            onChange(parsedDate);
+          } else {
+            onChange(null);
+          }
+        } else {
+          onChange(null);
+        }
+
+        // Move focus to the next field if necessary
+        if (value.length === fieldMaxLength) {
+          const nextField = getNextFieldRef(field);
+          if (nextField) {
+            nextField.current?.focus();
+          } else {
+            Keyboard.dismiss();
+          }
+        }
+
+        return newDateParts;
+      });
     },
-    [setFieldError, getNextFieldRef, getPrevFieldRef],
+    [onChange, getNextFieldRef, maxLengthMap],
   );
 
   // Handle key presses like backspace to clear fields and move focus
   const handleKeyPress = useCallback(
     (e: NativeSyntheticEvent<TextInputKeyPressEventData>, field: DateField) => {
-      if (e.nativeEvent.key === 'Backspace' && date[field].length === 0) {
-        const prevField = getPrevFieldRef(field);
-        prevField?.current?.focus();
+      if (e.nativeEvent.key === 'Backspace' && dateParts[field].length === 0) {
+        const prevFieldIndex = formatMap[dateFormat].indexOf(field) - 1;
+        if (prevFieldIndex >= 0) {
+          const prevField = formatMap[dateFormat][prevFieldIndex];
+          fieldRefs[prevField]?.current?.focus();
+        }
       }
     },
-    [date],
+    [dateParts, dateFormat, formatMap, fieldRefs],
   );
 
-  // Reset fields and clear formik values
+  // Reset fields
   const resetFields = useCallback(() => {
-    setDate({ day: '', month: '', year: '' });
+    setDateParts({ day: '', month: '', year: '' });
+    onChange(null);
     dayInputRef.current?.clear();
     monthInputRef.current?.clear();
     yearInputRef.current?.clear();
-  }, []);
+  }, [onChange]);
 
   return {
-    date,
-    isComplete,
+    dateParts,
     handleChange,
     handleKeyPress,
     resetFields,
