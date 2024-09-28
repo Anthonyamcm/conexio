@@ -1,8 +1,8 @@
 import React, {
-  useRef,
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import { Button, Footer, Input, Screen } from '@/src/components/atoms';
@@ -12,101 +12,122 @@ import { colors, spacing } from '@/src/utlis';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import _ from 'lodash';
 
-// Define FormData type
-type FormValues = {
+interface FormValues {
   username: string;
-};
+}
 
-// Simulated API check with improved typing
 const checkUsernameAvailability = async (
   username: string,
 ): Promise<boolean> => {
-  await new Promise((resolve) => setTimeout(resolve, 500)); // Reduced delay for better UX
-  return username !== 'test'; // Mocked API check, 'test' is taken
+  await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
+  return username !== 'test'; // Mocked API check: 'test' is taken
 };
 
-// Yup schema with async validation
 const usernameSchema = Yup.object().shape({
   username: Yup.string()
     .required('Username is required')
-    .test(
-      'checkUsernameAvailable',
-      'Username is already taken',
-      async (value) => {
-        if (value) {
-          return await checkUsernameAvailability(value);
-        }
-        return true;
-      },
-    ),
+    .min(3, 'Username must be at least 3 characters'),
 });
 
 export default function Username() {
   const { state, handleSubmitStep } = useRegistration();
   const [isChecking, setIsChecking] = useState<boolean>(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
-  const usernameRef = useRef<TextInput>(null);
 
-  // Throttled username check for better UX than debouncing
-  const handleCheckUsernameAvailability = useCallback(
-    _.debounce(async (username: string) => {
-      if (!username) {
-        setIsAvailable(false);
-        return;
-      }
-      setIsChecking(true);
+  const formik = useFormik<FormValues>({
+    initialValues: { username: state.formData.username || '' },
+    validationSchema: usernameSchema,
+    validateOnBlur: true,
+    validateOnChange: true,
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
       try {
-        const available = await checkUsernameAvailability(username);
+        setIsChecking(true);
+        const available = await checkUsernameAvailability(values.username);
         setIsAvailable(available);
+        if (!available) {
+          setErrors({ username: 'Username is already taken' });
+        } else {
+          await handleSubmitStep(usernameSchema, ['username'], {
+            username: values.username,
+          });
+        }
       } catch (error) {
         console.error('Error checking username availability:', error);
       } finally {
         setIsChecking(false);
+        setSubmitting(false);
       }
-    }, 500),
-    [],
-  );
-
-  useEffect(() => {
-    return () => handleCheckUsernameAvailability.cancel();
-  }, [handleCheckUsernameAvailability]);
-
-  // Memoized submit handler
-  const handleSubmit = useCallback(
-    async (values: FormValues) => {
-      if (!(await checkUsernameAvailability(values.username))) {
-        setIsAvailable(false);
-        return;
-      }
-      setIsAvailable(true);
-      await handleSubmitStep(usernameSchema, ['username'], {
-        ...values,
-        username: values.username,
-      });
     },
-    [handleSubmitStep],
-  );
-
-  // Memoized icon color function
-  const iconColor = useCallback(
-    (error: string | undefined) =>
-      error && !isChecking
-        ? colors.palette.error100
-        : colors.palette.neutral400,
-    [isChecking],
-  );
-
-  // Formik usage optimized with useFormik hook
-  const formik = useFormik<FormValues>({
-    initialValues: { username: state.formData.username },
-    validationSchema: usernameSchema,
-    onSubmit: handleSubmit,
   });
 
-  const RightAccessory = useMemo(() => {
+  // Refs to store latest values
+  const setIsAvailableRef = useRef(setIsAvailable);
+  const setIsCheckingRef = useRef(setIsChecking);
+  const formikSetFieldErrorRef = useRef(formik.setFieldError);
+
+  // Update refs on every render
+  useEffect(() => {
+    setIsAvailableRef.current = setIsAvailable;
+    setIsCheckingRef.current = setIsChecking;
+    formikSetFieldErrorRef.current = formik.setFieldError;
+  });
+
+  // Create the debounced function once
+  const debouncedCheckAvailability = useRef(
+    _.debounce(async (username: string) => {
+      if (usernameSchema.isValidSync({ username })) {
+        try {
+          const available = await checkUsernameAvailability(username);
+          setIsAvailableRef.current(available);
+          if (!available) {
+            formikSetFieldErrorRef.current(
+              'username',
+              'Username is already taken',
+            );
+          } else {
+            formikSetFieldErrorRef.current('username', undefined);
+          }
+        } catch (error) {
+          console.error('Error checking username availability:', error);
+        } finally {
+          setIsCheckingRef.current(false); // Ensure isChecking is set to false
+        }
+      } else {
+        setIsAvailableRef.current(null);
+        setIsCheckingRef.current(false); // Set isChecking to false if input is invalid
+      }
+    }, 500),
+  ).current;
+
+  // Cleanup debounced function on unmount
+  useEffect(() => {
+    return () => {
+      debouncedCheckAvailability.cancel();
+    };
+  }, [debouncedCheckAvailability]);
+
+  // Handle username change
+  const handleUsernameChange = useCallback(
+    (text: string) => {
+      formik.handleChange('username')(text);
+      setIsAvailable(null);
+      setIsChecking(true); // Set isChecking to true immediately
+      debouncedCheckAvailability(text);
+    },
+    [debouncedCheckAvailability, formik.handleChange],
+  );
+
+  const iconColor = useMemo(() => {
+    if (formik.errors.username && formik.touched.username) {
+      return colors.palette.error100;
+    }
+    return colors.palette.neutral400;
+  }, [formik.errors.username, formik.touched.username]);
+
+  const RightAccessory = useCallback(() => {
     if (isChecking) {
       return (
         <ActivityIndicator
@@ -116,17 +137,7 @@ export default function Username() {
         />
       );
     }
-    if (isAvailable === true && !formik.errors.username) {
-      return (
-        <MaterialIcons
-          name="check-circle"
-          size={26}
-          color={colors.palette.success100}
-          style={styles.status}
-        />
-      );
-    }
-    if (isAvailable === false || formik.errors.username) {
+    if (formik.errors.username) {
       return (
         <MaterialIcons
           name="cancel"
@@ -136,8 +147,23 @@ export default function Username() {
         />
       );
     }
-    if (isAvailable === null && !formik.errors.username) return null;
+    if (isAvailable && !formik.errors.username) {
+      return (
+        <MaterialIcons
+          name="check-circle"
+          size={26}
+          color={colors.palette.success100}
+          style={styles.status}
+        />
+      );
+    }
+    return null;
   }, [isChecking, isAvailable, formik.errors.username]);
+
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleContinuePress = useCallback(() => {
+    formik.handleSubmit();
+  }, [formik]);
 
   return (
     <Screen preset="auto" contentContainerStyle={styles.container}>
@@ -152,27 +178,23 @@ export default function Username() {
             <MaterialIcons
               name="alternate-email"
               size={26}
-              color={iconColor(formik.errors.username)}
+              color={iconColor}
               style={styles.icon}
             />
           )}
-          RightAccessory={() => RightAccessory}
+          RightAccessory={RightAccessory}
           value={formik.values.username}
-          onChangeText={(text) => {
-            formik.handleChange('username')(text);
-            handleCheckUsernameAvailability(text);
-          }}
+          onChangeText={handleUsernameChange}
           onBlur={formik.handleBlur('username')}
-          ref={usernameRef}
-          error={!!formik.errors.username && !isChecking}
+          error={!!formik.errors.username && formik.touched.username}
           errorText={formik.errors.username}
         />
 
         <Button
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={() => formik.handleSubmit()}
-          disabled={!formik.isValid || formik.isSubmitting}
+          onPress={handleContinuePress}
+          disabled={formik.isSubmitting || !formik.isValid || isChecking}
           isLoading={formik.isSubmitting}
         >
           Continue
