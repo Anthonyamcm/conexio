@@ -39,7 +39,6 @@ const styles = StyleSheet.create({
     height: 15,
     backgroundColor: colors.palette.neutral200, // Background color for incomplete progress
     borderRadius: 8,
-    marginBottom: spacing.md, // Spacing below the progress bar
     overflow: 'hidden', // Make sure progress bar has rounded corners
   },
   progressBar: {

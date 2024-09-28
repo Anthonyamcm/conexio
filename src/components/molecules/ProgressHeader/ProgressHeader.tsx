@@ -59,10 +59,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
   },
   backButton: {
+    flex: 1,
     paddingRight: spacing.md, // Adds some space between the back arrow and the progress bar
   },
   progressBarWrapper: {
     flex: 1, // Makes the progress bar take up the remaining space
-    alignItems: 'center',
   },
 });
