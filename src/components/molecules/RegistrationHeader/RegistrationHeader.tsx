@@ -6,7 +6,7 @@ import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Text } from '../../atoms';
 
-export default function ProgressHeader() {
+export default function RegistrationHeader() {
   const { prevStep, state, clearFormData, steps } = useRegistration();
 
   const showAlert = () => {

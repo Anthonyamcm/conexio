@@ -1,6 +1,6 @@
 import { RegistrationProvider } from '@/src/contexts/RegistrationContext';
 import { Stack } from 'expo-router';
-import { ProgressHeader } from '@/src/components/molecules';
+import { RegistrationHeader } from '@/src/components/molecules';
 import { Screen } from '@/src/components/atoms';
 
 export default function Layout() {
@@ -12,7 +12,7 @@ export default function Layout() {
       }}
     >
       <RegistrationProvider>
-        <ProgressHeader />
+        <RegistrationHeader />
         <Stack
           screenOptions={{
             headerShown: false,

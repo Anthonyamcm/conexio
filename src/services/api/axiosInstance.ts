@@ -7,11 +7,12 @@ import axios, {
 } from 'axios';
 import { Alert } from 'react-native';
 import {
+  clearAllTokens,
   getAuthToken,
   getRefreshToken,
   setAuthToken,
   setRefreshToken,
-} from './auth'; // Import helper functions
+} from '../../utils/SecureStore'; // Import helper functions
 
 // Define the shape of your error response
 interface ErrorResponse {
@@ -167,10 +168,7 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         processQueue(err, null);
 
-        // Clear auth tokens
-        await setAuthToken('');
-        // Optionally clear refresh token as well
-        await setRefreshToken('');
+        await clearAllTokens();
 
         Alert.alert('Authentication Error', 'Please log in again.');
         return Promise.reject(err);

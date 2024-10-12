@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import axios from 'axios';
 import {
+  clearAllTokens,
   getAuthToken,
   getRefreshToken,
   setAuthToken,
   setRefreshToken,
-} from '../services/api/auth';
-import * as Keychain from 'react-native-keychain';
+} from '../utils/SecureStore';
 
 interface AuthState {
   authToken: string | null;
@@ -89,13 +89,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
   async logout() {
     try {
-      await Promise.all([
-        // If using separate services:
-        Keychain.resetGenericPassword({ service: 'authToken' }),
-        Keychain.resetGenericPassword({ service: 'refreshToken' }),
-        // If using consolidated storage:
-        // clearAuthData(),
-      ]);
+      await clearAllTokens();
+
       set({
         authToken: null,
         refreshToken: null,
