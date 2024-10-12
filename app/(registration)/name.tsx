@@ -101,8 +101,7 @@ const styles = StyleSheet.create({
   formContainer: {
     flex: 1,
     flexDirection: 'column',
-    gap: 15,
-    marginTop: spacing.md,
+    gap: 10,
   },
   icon: {
     alignSelf: 'center',

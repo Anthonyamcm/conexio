@@ -1,8 +1,8 @@
 export type User = {
   id: number;
-  firstName: string;
-  lastName: string;
-  userName: string;
+  diaplayName: string;
+  username: string;
+  dob: Date;
   email: string | null;
   mobile: string | null;
 };

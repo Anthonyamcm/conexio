@@ -4,10 +4,9 @@ import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { ProgressBar } from '../../atoms'; // Assuming named export of ProgressBar
 
 export default function ProgressHeader() {
-  const { steps, prevStep, state, clearFormData } = useRegistration();
+  const { prevStep, state, clearFormData } = useRegistration();
 
   const showAlert = () => {
     if (state.currentStep === 0) {
@@ -41,11 +40,6 @@ export default function ProgressHeader() {
       <TouchableOpacity onPress={showAlert} style={styles.backButton}>
         <Entypo name="chevron-left" size={32} color="black" />
       </TouchableOpacity>
-
-      {/* Progress Bar */}
-      <View style={styles.progressBarWrapper}>
-        <ProgressBar numberOfSteps={steps.length} />
-      </View>
     </View>
   );
 }

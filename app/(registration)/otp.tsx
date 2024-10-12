@@ -7,6 +7,7 @@ import { Header, OneTimePasscode } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utils';
 import { OneTimePasscodeHandle } from '@/src/components/molecules/OneTimePasscode/UseOneTimePasscode';
+import { useConfrimUser } from '@/src/hooks/useConfirmUser';
 
 interface FormValues {
   OTP: string;
@@ -24,19 +25,46 @@ export default function Otp() {
   const otpRef = useRef<OneTimePasscodeHandle>(null);
 
   const formik = useFormik<FormValues>({
-    initialValues: { OTP: state.formData.OTP || '' },
+    initialValues: { OTP: state.formData.code || '' },
     validationSchema: otpSchema,
     onSubmit: async (values: FormValues, { setSubmitting }) => {
       try {
-        await handleSubmitStep(otpSchema, ['OTP'], { OTP: values.OTP });
+        await handleSubmitStep(otpSchema, ['code'], { code: values.OTP });
+        const identifier = state.formData.email
+          ? state.formData.email
+          : state.formData.mobile;
+
+        const registrationData = {
+          identifier: identifier!,
+          code: values.OTP,
+          password: state.formData.password,
+          displayName: state.formData.name,
+          username: state.formData.username,
+          dob: state.formData.dob!,
+        };
+        mutation.mutate(registrationData);
       } catch (error) {
-        console.error('Error submitting OTP', error);
+        formik.setStatus({
+          formError: 'An unexpected error occurred. Please try again.',
+        });
       } finally {
         setSubmitting(false);
       }
     },
     validateOnChange: true,
     validateOnBlur: true,
+  });
+
+  const mutation = useConfrimUser({
+    onSuccess: (data) => {
+      console.log('Confirmation successful:', data);
+    },
+    onError: (error) => {
+      console.error('Registration error:', error);
+      if (error.message) {
+        formik.setErrors({ OTP: error.message });
+      }
+    },
   });
 
   // Memoized handlers to prevent unnecessary re-renders

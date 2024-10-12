@@ -15,7 +15,7 @@ export interface FormData {
   dob: Date | null;
   email?: string;
   mobile?: string;
-  OTP: string;
+  code: string;
   password: string;
   username: string;
 }
@@ -34,7 +34,7 @@ const initialState: RegistrationState = {
     dob: null,
     email: '',
     mobile: '',
-    OTP: '',
+    code: '',
     password: '',
     username: '',
   },
@@ -123,7 +123,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
 }) => {
   const [state, dispatch] = useReducer(registrationReducer, initialState);
   const router = useRouter();
-  const steps = ['Mobile', 'OTP', 'Name', 'Username', 'DOB', 'Password'];
+  const steps = ['Mobile', 'Code', 'Name', 'Username', 'DOB', 'Password'];
 
   // Function to update form data
   const setFormData = useCallback((newData: Partial<FormData>) => {
@@ -177,11 +177,11 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   // Function to navigate to the appropriate screen
   const goToNextScreen = useCallback(() => {
     const stepRoutes: { [key: number]: Href<string | object> } = {
-      0: '/(registration)/otp',
-      1: '/(registration)/name',
-      2: '/(registration)/username',
-      3: '/(registration)/dob',
-      4: '/(registration)/password',
+      0: '/(registration)/username',
+      1: '/(registration)/dob',
+      2: '/(registration)/password',
+      3: '/(registration)/mobile',
+      4: '/(registration)/otp',
     };
 
     const nextRoute = stepRoutes[state.currentStep];

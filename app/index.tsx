@@ -3,11 +3,9 @@ import { colors, spacing } from '@/src/utils';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-//TODO Finish design
-
 export default function Home() {
   const registerPressed = () => {
-    router.push('/(registration)/mobile');
+    router.push('/(registration)/name');
   };
 
   const loginPressed = () => {

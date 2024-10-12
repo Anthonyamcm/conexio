@@ -1,6 +1,7 @@
 import { Button, Footer, Input, Screen } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
+import { useRegisterUser } from '@/src/hooks/useRegisterUser';
 import { colors, spacing } from '@/src/utils';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
@@ -40,10 +41,36 @@ export default function Email() {
           ...values,
           email: values.email,
         });
+        const registrationData = {
+          identifier: values.email,
+          password: state.formData.password,
+          isEmail: true,
+        };
+        mutation.mutate(registrationData);
       } catch (error) {
-        console.error('Error submitting mobile number:', error);
+        formik.setStatus({
+          formError: 'An unexpected error occurred. Please try again.',
+        });
       } finally {
         setSubmitting(false);
+      }
+    },
+  });
+
+  const mutation = useRegisterUser({
+    onSuccess: (data) => {
+      console.log('Registration successful:', data);
+    },
+    onError: (error) => {
+      console.error('Registration error:', error);
+      if (error?.message) {
+        // If the error is related to the email field
+        formik.setErrors({ email: error.message });
+      } else {
+        // For general errors, set a form-level error
+        formik.setStatus({
+          formError: 'Registration failed. Please try again.',
+        });
       }
     },
   });
@@ -89,8 +116,10 @@ export default function Email() {
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
           onPress={handleContinuePress}
-          disabled={!formik.isValid || formik.isSubmitting}
-          isLoading={formik.isSubmitting}
+          disabled={
+            !formik.isValid || formik.isSubmitting || mutation.isPending
+          }
+          isLoading={formik.isSubmitting || mutation.isPending}
         >
           Continue
         </Button>
