@@ -26,11 +26,11 @@ export default function Home() {
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={loginPressed}
+          onPress={() => loginPressed()}
         >
           {'Sign in'}
         </Button>
-        <Button preset={'default'} onPress={registerPressed}>
+        <Button preset={'default'} onPress={() => registerPressed()}>
           {'Create account'}
         </Button>
       </View>

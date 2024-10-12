@@ -12,6 +12,7 @@ import { useColorScheme } from '@/src/hooks/useColorScheme';
 import { customFontsToLoad, queryClient } from '@/src/utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from '@/src/store/AuthStore';
+import Toast from 'react-native-toast-message';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -44,6 +45,7 @@ export default function RootLayout() {
             <Stack.Screen name="(app)" />
           )}
         </Stack>
+        <Toast />
       </QueryClientProvider>
     </ThemeProvider>
   );
