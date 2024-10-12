@@ -14,6 +14,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import _ from 'lodash';
+import UsernamechCheck from '@/src/components/atoms/UsernameCheck';
 
 interface FormValues {
   username: string;
@@ -121,11 +122,11 @@ export default function Username() {
   );
 
   const iconColor = useMemo(() => {
-    if (formik.errors.username && formik.touched.username) {
+    if (formik.errors.username) {
       return colors.palette.error100;
     }
     return colors.palette.neutral400;
-  }, [formik.errors.username, formik.touched.username]);
+  }, [formik.errors.username]);
 
   const RightAccessory = useCallback(() => {
     if (isChecking) {
@@ -137,28 +138,9 @@ export default function Username() {
         />
       );
     }
-    if (formik.errors.username) {
-      return (
-        <MaterialIcons
-          name="cancel"
-          size={26}
-          color={colors.palette.error100}
-          style={styles.status}
-        />
-      );
-    }
-    if (isAvailable && !formik.errors.username) {
-      return (
-        <MaterialIcons
-          name="check-circle"
-          size={26}
-          color={colors.palette.success100}
-          style={styles.status}
-        />
-      );
-    }
+
     return null;
-  }, [isChecking, isAvailable, formik.errors.username]);
+  }, [isChecking]);
 
   // Memoized handlers to prevent unnecessary re-renders
   const handleContinuePress = useCallback(() => {
@@ -172,23 +154,29 @@ export default function Username() {
         subtitle="Choose a unique username to be associated with your account."
       />
       <View style={styles.formContainer}>
-        <Input
-          placeholder="Username"
-          LeftAccessory={() => (
-            <MaterialIcons
-              name="alternate-email"
-              size={26}
-              color={iconColor}
-              style={styles.icon}
-            />
-          )}
-          RightAccessory={RightAccessory}
-          value={formik.values.username}
-          onChangeText={handleUsernameChange}
-          onBlur={formik.handleBlur('username')}
-          error={!!formik.errors.username && formik.touched.username}
-          errorText={formik.errors.username}
-        />
+        <View>
+          <Input
+            placeholder="Username"
+            LeftAccessory={() => (
+              <MaterialIcons
+                name="alternate-email"
+                size={26}
+                color={iconColor}
+                style={styles.icon}
+              />
+            )}
+            RightAccessory={RightAccessory}
+            value={formik.values.username}
+            onChangeText={handleUsernameChange}
+            onBlur={formik.handleBlur('username')}
+            error={!!formik.errors.username}
+          />
+          <UsernamechCheck
+            isAvailable={isAvailable}
+            isChecking={isChecking}
+            error={formik.errors.username}
+          />
+        </View>
 
         <Button
           preset="gradient"
