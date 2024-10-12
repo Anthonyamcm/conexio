@@ -123,7 +123,14 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
 }) => {
   const [state, dispatch] = useReducer(registrationReducer, initialState);
   const router = useRouter();
-  const steps = ['Mobile', 'Code', 'Name', 'Username', 'DOB', 'Password'];
+  const steps = [
+    'Name',
+    'Username',
+    'Date of birth',
+    'Password',
+    'Mobile',
+    'Confirm',
+  ];
 
   // Function to update form data
   const setFormData = useCallback((newData: Partial<FormData>) => {

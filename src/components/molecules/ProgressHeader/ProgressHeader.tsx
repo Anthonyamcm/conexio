@@ -4,9 +4,10 @@ import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { Text } from '../../atoms';
 
 export default function ProgressHeader() {
-  const { prevStep, state, clearFormData } = useRegistration();
+  const { prevStep, state, clearFormData, steps } = useRegistration();
 
   const showAlert = () => {
     if (state.currentStep === 0) {
@@ -40,6 +41,15 @@ export default function ProgressHeader() {
       <TouchableOpacity onPress={showAlert} style={styles.backButton}>
         <Entypo name="chevron-left" size={32} color="black" />
       </TouchableOpacity>
+      <View style={{ flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+        <Text preset="bold" size="md">
+          {steps[state.currentStep]}
+        </Text>
+        <Text preset="bold" size="md">
+          {state.currentStep + 1 + ' of ' + steps.length}
+        </Text>
+      </View>
+      <View style={{ flex: 1 }} />
     </View>
   );
 }
@@ -54,9 +64,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     flex: 1,
-    paddingRight: spacing.md, // Adds some space between the back arrow and the progress bar
   },
-  progressBarWrapper: {
+  Wrapper: {
     flex: 1, // Makes the progress bar take up the remaining space
   },
 });

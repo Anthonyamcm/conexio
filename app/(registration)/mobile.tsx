@@ -124,15 +124,7 @@ export default function Mobile() {
           accessibilityLabel="Mobile number input"
           containerStyle={{ flex: 1 }}
         />
-        <Button
-          preset="gradient"
-          gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={handleContinuePress}
-          disabled={!formik.isValid || formik.isSubmitting}
-          isLoading={formik.isSubmitting}
-        >
-          Continue
-        </Button>
+
         <Button
           preset="default"
           textStyle={{ fontWeight: '300' }}
@@ -141,7 +133,11 @@ export default function Mobile() {
           Sign up with email
         </Button>
       </View>
-      <Footer />
+      <Footer
+        onPress={handleContinuePress}
+        isDisabled={!formik.isValid || formik.isSubmitting}
+        isLoading={formik.isSubmitting}
+      />
       <CountryPicker
         lang="en"
         show={showCountryPicker}

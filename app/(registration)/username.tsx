@@ -177,18 +177,12 @@ export default function Username() {
             error={formik.errors.username}
           />
         </View>
-
-        <Button
-          preset="gradient"
-          gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={handleContinuePress}
-          disabled={formik.isSubmitting || !formik.isValid || isChecking}
-          isLoading={formik.isSubmitting}
-        >
-          Continue
-        </Button>
       </View>
-      <Footer />
+      <Footer
+        onPress={handleContinuePress}
+        isDisabled={!formik.isValid || formik.isSubmitting}
+        isLoading={formik.isSubmitting}
+      />
     </Screen>
   );
 }

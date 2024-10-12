@@ -59,18 +59,12 @@ export default function Dob() {
           touched={formik.touched.dob}
           onBlur={() => formik.setFieldTouched('dob', true)}
         />
-
-        <Button
-          preset="gradient"
-          gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={handleContinuePress}
-          disabled={formik.isSubmitting || !formik.isValid}
-          isLoading={formik.isSubmitting}
-        >
-          Continue
-        </Button>
       </View>
-      <Footer />
+      <Footer
+        onPress={handleContinuePress}
+        isDisabled={!formik.isValid || formik.isSubmitting}
+        isLoading={formik.isSubmitting}
+      />
     </Screen>
   );
 }

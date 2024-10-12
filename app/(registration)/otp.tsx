@@ -104,7 +104,6 @@ export default function Otp() {
           Didn't receive code?
         </Button>
       </View>
-      <Footer />
     </Screen>
   );
 }

@@ -1,44 +1,26 @@
-import { Link, router } from 'expo-router';
-import { Alert, TouchableOpacity, View } from 'react-native';
-import { Text } from './Text';
-import { useRegistration } from '@/src/contexts/RegistrationContext';
+import { Button } from './Button';
+import { colors } from '@/src/utils';
 
-export default function Footer() {
-  const { clearFormData } = useRegistration();
-  const showAlert = () => {
-    Alert.alert(
-      'Alread have an account?',
-      '',
-      [
-        {
-          text: `Log in`,
-          onPress: () => {
-            clearFormData(), router.replace('/');
-          },
-        },
-        {
-          text: 'Continue creating account',
-          onPress: () => console.log('Here'),
-          style: 'cancel',
-        },
-      ],
-      { cancelable: false }, // Prevents dismissing the alert by tapping outside
-    );
-  };
+interface FooterProps {
+  onPress: () => void;
+  isDisabled: boolean;
+  isLoading: boolean;
+}
 
+export default function Footer({
+  onPress,
+  isDisabled,
+  isLoading,
+}: FooterProps) {
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignContent: 'center',
-      }}
+    <Button
+      preset="gradient"
+      gradient={[colors.palette.primary100, colors.palette.secondary100]}
+      onPress={onPress}
+      disabled={isDisabled}
+      isLoading={isLoading}
     >
-      <TouchableOpacity onPress={() => showAlert()}>
-        <Text weight="medium" size="xs">
-          {'I already have an account'}
-        </Text>
-      </TouchableOpacity>
-    </View>
+      Continue
+    </Button>
   );
 }

@@ -119,15 +119,6 @@ export default function Email() {
         />
 
         <Button
-          preset="gradient"
-          gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          onPress={handleContinuePress}
-          disabled={!formik.isValid || formik.isSubmitting || isPending}
-          isLoading={formik.isSubmitting || isPending}
-        >
-          Continue
-        </Button>
-        <Button
           preset="default"
           textStyle={{ fontWeight: '300' }}
           onPress={mobilePressed}
@@ -135,7 +126,11 @@ export default function Email() {
           Sign up with mobile
         </Button>
       </View>
-      <Footer />
+      <Footer
+        onPress={handleContinuePress}
+        isDisabled={!formik.isValid || formik.isSubmitting}
+        isLoading={formik.isSubmitting}
+      />
     </Screen>
   );
 }
