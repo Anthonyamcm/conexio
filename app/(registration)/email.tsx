@@ -37,37 +37,43 @@ export default function Email() {
     validationSchema: emailSchema,
     onSubmit: async (values: FormValues, { setSubmitting }) => {
       try {
-        await handleSubmitStep(emailSchema, ['email'], {
-          ...values,
-          email: values.email,
-        });
         const registrationData = {
           identifier: values.email,
           password: state.formData.password,
           isEmail: true,
         };
-        mutation.mutate(registrationData);
-      } catch (error) {
-        formik.setStatus({
-          formError: 'An unexpected error occurred. Please try again.',
+
+        await mutateAsync(registrationData);
+
+        await handleSubmitStep(emailSchema, ['email'], {
+          ...values,
+          email: values.email,
         });
+      } catch (error: any) {
+        if (error?.response?.data?.errors) {
+          // Assuming the error response structure
+          const fieldErrors = error.response.data.errors;
+          formik.setErrors(fieldErrors);
+        } else if (error?.message) {
+          // General form-level error
+          formik.setStatus({ formError: error.message });
+        } else {
+          // Fallback error message
+          formik.setStatus({
+            formError: 'An unexpected error occurred. Please try again.',
+          });
+        }
       } finally {
         setSubmitting(false);
       }
     },
   });
 
-  const mutation = useRegisterUser({
-    onSuccess: (data) => {
-      console.log('Registration successful:', data);
-    },
+  const { mutateAsync, isPending } = useRegisterUser({
     onError: (error) => {
-      console.error('Registration error:', error);
-      if (error?.message) {
-        // If the error is related to the email field
-        formik.setErrors({ email: error.message });
+      if (error?.status === 409) {
+        formik.setErrors({ email: 'Email is already in use' });
       } else {
-        // For general errors, set a form-level error
         formik.setStatus({
           formError: 'Registration failed. Please try again.',
         });
@@ -116,10 +122,8 @@ export default function Email() {
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
           onPress={handleContinuePress}
-          disabled={
-            !formik.isValid || formik.isSubmitting || mutation.isPending
-          }
-          isLoading={formik.isSubmitting || mutation.isPending}
+          disabled={!formik.isValid || formik.isSubmitting || isPending}
+          isLoading={formik.isSubmitting || isPending}
         >
           Continue
         </Button>

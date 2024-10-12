@@ -29,7 +29,6 @@ export default function Otp() {
     validationSchema: otpSchema,
     onSubmit: async (values: FormValues, { setSubmitting }) => {
       try {
-        await handleSubmitStep(otpSchema, ['code'], { code: values.OTP });
         const identifier = state.formData.email
           ? state.formData.email
           : state.formData.mobile;
@@ -42,7 +41,10 @@ export default function Otp() {
           username: state.formData.username,
           dob: state.formData.dob!,
         };
-        mutation.mutate(registrationData);
+
+        await mutateAsync(registrationData);
+
+        await handleSubmitStep(otpSchema, ['code'], { code: values.OTP });
       } catch (error) {
         formik.setStatus({
           formError: 'An unexpected error occurred. Please try again.',
@@ -55,14 +57,14 @@ export default function Otp() {
     validateOnBlur: true,
   });
 
-  const mutation = useConfrimUser({
-    onSuccess: (data) => {
-      console.log('Confirmation successful:', data);
-    },
+  const { mutateAsync, isPending } = useConfrimUser({
     onError: (error) => {
-      console.error('Registration error:', error);
-      if (error.message) {
-        formik.setErrors({ OTP: error.message });
+      if (error?.status === 400) {
+        formik.setErrors({ OTP: 'Invalid confirmation code.' });
+      } else {
+        formik.setStatus({
+          formError: 'Registration failed. Please try again.',
+        });
       }
     },
   });
@@ -93,8 +95,8 @@ export default function Otp() {
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
           onPress={handleContinuePress}
-          disabled={!formik.isValid || formik.isSubmitting}
-          isLoading={formik.isSubmitting}
+          disabled={!formik.isValid || formik.isSubmitting || isPending}
+          isLoading={formik.isSubmitting || isPending}
         >
           Continue
         </Button>

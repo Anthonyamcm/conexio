@@ -6,7 +6,7 @@ import { Button, Input, Screen, Text } from '@/src/components/atoms';
 import { colors, spacing } from '@/src/utils';
 import { Header } from '@/src/components/molecules';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useRouter } from 'expo-router';
+import { useLoginUser } from '@/src/hooks/useLoginUser';
 
 interface FormValues {
   email: string;
@@ -22,7 +22,6 @@ const loginSchema = Yup.object().shape({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const router = useRouter();
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -33,12 +32,11 @@ export default function Login() {
     validationSchema: loginSchema,
     onSubmit: async (values: FormValues) => {
       try {
-        // Handle login logic here
-        console.log('Login submitted:', values);
-        // Navigate to the home screen or handle login success
-        // Example:
-        // await loginUser(values.email, values.password);
-        // router.push('/home');
+        const loginData = {
+          email: values.email,
+          password: values.password,
+        };
+        await mutateAsync(loginData);
       } catch (error) {
         console.error('Error during login:', error);
         Alert.alert(
@@ -49,6 +47,18 @@ export default function Login() {
     },
     validateOnChange: true,
     validateOnBlur: true,
+  });
+
+  const { mutateAsync, isPending } = useLoginUser({
+    onError: (error) => {
+      if (error?.status === 409) {
+        formik.setErrors({ email: 'Email is already in use' });
+      } else {
+        formik.setStatus({
+          formError: 'Registration failed. Please try again.',
+        });
+      }
+    },
   });
 
   const getIconColor = useCallback(
@@ -123,8 +133,8 @@ export default function Login() {
           preset="gradient"
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
           onPress={handleContinuePress}
-          disabled={!formik.isValid || formik.isSubmitting}
-          isLoading={formik.isSubmitting}
+          disabled={!formik.isValid || formik.isSubmitting || isPending}
+          isLoading={formik.isSubmitting || isPending}
         >
           Sign in
         </Button>
