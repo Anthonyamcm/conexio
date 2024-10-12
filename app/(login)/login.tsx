@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Button, Input, Screen, Text } from '@/src/components/atoms';
@@ -22,6 +22,7 @@ const loginSchema = Yup.object().shape({
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -39,10 +40,6 @@ export default function Login() {
         await mutateAsync(loginData);
       } catch (error) {
         console.error('Error during login:', error);
-        Alert.alert(
-          'Login Error',
-          'An error occurred during login. Please try again.',
-        );
       }
     },
     validateOnChange: true,
@@ -51,8 +48,8 @@ export default function Login() {
 
   const { mutateAsync, isPending } = useLoginUser({
     onError: (error) => {
-      if (error?.status === 409) {
-        formik.setErrors({ email: 'Email is already in use' });
+      if (error?.status === 401) {
+        setError('Incorrect email or password ');
       } else {
         formik.setStatus({
           formError: 'Registration failed. Please try again.',
@@ -81,7 +78,28 @@ export default function Login() {
         title="Sign in"
         subtitle="Enter your email and password to access your account."
       />
+
       <View style={styles.formContainer}>
+        {error && (
+          <View
+            style={{
+              padding: spacing.sm,
+              backgroundColor: colors.palette.error100,
+              borderRadius: 12,
+            }}
+          >
+            <View style={{ flexDirection: 'row', gap: 15 }}>
+              <Ionicons
+                name="information-circle-outline"
+                size={24}
+                color={colors.palette.neutral100}
+              />
+              <Text preset="bold" style={{ color: colors.palette.neutral100 }}>
+                {error}
+              </Text>
+            </View>
+          </View>
+        )}
         <Input
           placeholder="Email"
           value={formik.values.email}
