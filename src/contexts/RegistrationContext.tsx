@@ -214,6 +214,9 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
       );
       if (isValid) {
         setFormData(formData);
+        if (state.currentStep === steps.length - 1) {
+          return;
+        }
         nextStep();
         goToNextScreen();
       }

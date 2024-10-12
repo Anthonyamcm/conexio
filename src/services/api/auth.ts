@@ -1,69 +1,20 @@
-import * as Keychain from 'react-native-keychain';
-import { User } from '@/src/config';
+import * as SecureStore from 'expo-secure-store';
 
-// Define interfaces
-interface LoginResponse {
-  token: string;
-  refreshToken: string;
-  user: User;
-}
-
-interface LogoutResponse {
-  message: string;
-}
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-/**
- * Login Function
- * @param credentials - User login credentials
- * @returns Promise containing login response
- */
-// export const login = async (
-//   credentials: LoginRequest,
-// ): Promise<LoginResponse> => {
-//   const response: AxiosResponse<LoginResponse> = await axiosInstance.post(
-//     '/auth/login',
-//     credentials,
-//   );
-//   const { token, refreshToken } = response.data;
-
-//   // Store tokens securely using Keychain
-//   await Keychain.setGenericPassword('authToken', token);
-//   await Keychain.setGenericPassword('refreshToken', refreshToken);
-
-//   return response.data;
-// };
-
-// /**
-//  * Logout Function
-//  * @returns Promise containing logout response
-//  */
-// export const logout = async (): Promise<LogoutResponse> => {
-//   const response: AxiosResponse<LogoutResponse> =
-//     await axiosInstance.post('/auth/logout');
-
-//   // Remove tokens from storage
-//   await Keychain.resetGenericPassword();
-
-//   return response.data;
-// };
+const AUTH_TOKEN_KEY = 'authToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
 
 /**
  * Retrieve Auth Token
  * @returns Promise containing auth token or null
  */
 export const getAuthToken = async (): Promise<string | null> => {
-  const credentials = await Keychain.getGenericPassword({
-    service: 'authToken',
-  });
-  if (credentials) {
-    return credentials.password;
+  try {
+    const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+    return token;
+  } catch (error) {
+    console.error('Error retrieving auth token from SecureStore', error);
+    return null;
   }
-  return null;
 };
 
 /**
@@ -71,13 +22,13 @@ export const getAuthToken = async (): Promise<string | null> => {
  * @returns Promise containing refresh token or null
  */
 export const getRefreshToken = async (): Promise<string | null> => {
-  const credentials = await Keychain.getGenericPassword({
-    service: 'refreshToken',
-  });
-  if (credentials) {
-    return credentials.password;
+  try {
+    const token = await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+    return token;
+  } catch (error) {
+    console.error('Error retrieving refresh token from SecureStore', error);
+    return null;
   }
-  return null;
 };
 
 /**
@@ -85,9 +36,12 @@ export const getRefreshToken = async (): Promise<string | null> => {
  * @param token - New authentication token
  */
 export const setAuthToken = async (token: string): Promise<void> => {
-  await Keychain.setGenericPassword('authToken', token, {
-    service: 'authToken',
-  });
+  try {
+    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
+  } catch (error) {
+    console.error('Error setting auth token in SecureStore', error);
+    throw error;
+  }
 };
 
 /**
@@ -95,7 +49,24 @@ export const setAuthToken = async (token: string): Promise<void> => {
  * @param refreshToken - New refresh token
  */
 export const setRefreshToken = async (refreshToken: string): Promise<void> => {
-  await Keychain.setGenericPassword('refreshToken', refreshToken, {
-    service: 'refreshToken',
-  });
+  try {
+    await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+  } catch (error) {
+    console.error('Error setting refresh token in SecureStore', error);
+    throw error;
+  }
+};
+
+/**
+ * Clear All Tokens
+ */
+export const clearAllTokens = async (): Promise<void> => {
+  try {
+    await Promise.all([
+      SecureStore.deleteItemAsync(AUTH_TOKEN_KEY),
+      SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY),
+    ]);
+  } catch (error) {
+    console.error('Error clearing tokens from SecureStore', error);
+  }
 };

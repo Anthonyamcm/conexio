@@ -59,7 +59,7 @@ export const useRegisterUser = (
      * Default onSuccess handler.
      * You can customize this based on your application's needs.
      */
-    onSuccess: (data: any, variables: any, context: any) => {
+    onSuccess: async (data: any, variables: any, context: any) => {
       // Handle successful registration, e.g., navigate to a welcome page
       console.log('Registration successful:', data);
 

@@ -5,11 +5,11 @@ import { StyleSheet, View } from 'react-native';
 
 export default function Home() {
   const registerPressed = () => {
-    router.push('/(registration)/name');
+    router.push('/(auth)/(registration)');
   };
 
   const loginPressed = () => {
-    router.push('/(login)/login');
+    router.push('/(auth)/(login)');
   };
 
   return (

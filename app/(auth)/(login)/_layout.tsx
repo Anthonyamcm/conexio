@@ -9,10 +9,10 @@ export default function Layout() {
   const backPressed = () => {
     router.back();
   };
+
   return (
     <Screen
       preset="fixed"
-      safeAreaEdges={['top', 'bottom']}
       contentContainerStyle={{
         flex: 1,
       }}

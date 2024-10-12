@@ -9,7 +9,7 @@ import {
   ConfrimRegistrationResponse,
 } from '../types';
 import { confrimUser } from '../services/api/confirm.api';
-import { setAuthToken, setRefreshToken } from '../services/api/auth';
+import { useAuthStore } from '../store/AuthStore';
 
 /**
  * APIError interface represents the structure of error responses from the API.
@@ -36,6 +36,8 @@ export const useConfrimUser = (
   APIError,
   ConfirmUserRegistrationData
 > => {
+  const login = useAuthStore((state) => state.login);
+
   return useMutation<
     ConfrimRegistrationResponse,
     APIError,
@@ -76,8 +78,12 @@ export const useConfrimUser = (
      * You can customize this based on your application's needs.
      */
     onSuccess: async (data: any, variables: any, context: any) => {
-      await setAuthToken(data.Accesstoken);
-      await setRefreshToken(data.RefreshToken);
+      try {
+        await login(data.AccessToken, data.RefreshToken);
+      } catch (error) {
+        console.error('Login error:', error);
+      }
+
       if (options?.onSuccess) {
         options.onSuccess(data, variables, context);
       }
