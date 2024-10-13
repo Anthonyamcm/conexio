@@ -5,6 +5,7 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import {
   StyleProp,
@@ -59,6 +60,7 @@ const Input = forwardRef(function TextField(
   ref: Ref<TextInput>,
 ) {
   const inputRef = useRef<TextInput>(null);
+  const [inputHeight, setInputHeight] = useState<number | undefined>(undefined);
 
   const disabled = TextInputProps.editable === false;
   const multiline = TextInputProps.multiline ?? false;
@@ -80,7 +82,7 @@ const Input = forwardRef(function TextField(
     () => [
       inputWrapperStyle,
       error && { borderColor: colors.palette.error100 },
-      multiline && { minHeight: 112 },
+      multiline && {},
       LeftAccessory && { paddingStart: 0 },
       RightAccessory && { paddingEnd: 0 },
       inputWrapperStyleOverride,
@@ -98,7 +100,7 @@ const Input = forwardRef(function TextField(
     () => [
       inputStyle,
       disabled && { color: colors.textDim },
-      multiline && { minHeight: 112 },
+      multiline && {},
       $inputStyleOverride,
     ],
     [disabled, multiline, $inputStyleOverride],
@@ -116,6 +118,17 @@ const Input = forwardRef(function TextField(
   const focusInput = () => {
     if (!disabled) {
       inputRef.current?.focus();
+    }
+  };
+
+  const handleContentSizeChange = (event: {
+    nativeEvent: { contentSize: { height: number } };
+  }) => {
+    if (multiline) {
+      const { height } = event.nativeEvent.contentSize;
+      // Optionally, set a maximum height
+      const maxHeight = 100; // Adjust as needed
+      setInputHeight(Math.min(height, maxHeight));
     }
   };
 
@@ -154,6 +167,7 @@ const Input = forwardRef(function TextField(
           }
           {...TextInputProps}
           editable={!disabled}
+          onContentSizeChange={handleContentSizeChange}
           style={inputStyles}
         />
 
@@ -206,7 +220,7 @@ const inputStyle: TextStyle = {
   fontFamily: typography.primary.medium,
   color: colors.text,
   fontSize: 16,
-  height: 32,
+
   paddingVertical: 0,
   paddingHorizontal: 0,
   marginVertical: spacing.xs,

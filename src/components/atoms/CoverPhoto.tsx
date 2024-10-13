@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   coverPhoto: {
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    height: 150,
+    height: 175,
     resizeMode: 'cover',
     width: '100%',
   },

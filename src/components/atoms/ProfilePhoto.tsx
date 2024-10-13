@@ -41,11 +41,11 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
   profilePhoto: {
-    width: 135,
-    height: 135,
-    borderRadius: 135 / 2,
+    width: 125,
+    height: 125,
+    borderRadius: 125 / 2,
     borderWidth: 4,
-    borderColor: colors.palette.neutral300,
+    borderColor: colors.palette.neutral100,
     resizeMode: 'cover',
   },
   placeholder: {
