@@ -220,7 +220,6 @@ const inputStyle: TextStyle = {
   fontFamily: typography.primary.medium,
   color: colors.text,
   fontSize: 16,
-
   paddingVertical: 0,
   paddingHorizontal: 0,
   marginVertical: spacing.xs,

@@ -37,8 +37,9 @@ const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ uri, onEdit }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: -50, // To overlap the cover photo
+    marginTop: -55, // To overlap the cover photo
     marginLeft: 5,
+    marginRight: 'auto',
   },
   profilePhoto: {
     width: 125,

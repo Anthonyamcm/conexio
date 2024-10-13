@@ -191,8 +191,6 @@ const BioSection: React.FC<{
         placeholder="Bio"
         multiline
         containerStyle={styles.bioInputContainer}
-        style={styles.bioInput}
-        inputWrapperStyle={styles.bioInputWrapper}
         value={bio}
         onChangeText={handleChangeText}
       />
@@ -324,13 +322,7 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
   },
   bioInputContainer: {
-    marginVertical: 0,
-  },
-  bioInput: {
-    color: colors.text,
-  },
-  bioInputWrapper: {
-    marginVertical: 0,
+    marginBottom: 0,
   },
   bioCounter: {
     alignSelf: 'flex-end',
