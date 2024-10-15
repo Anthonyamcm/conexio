@@ -97,7 +97,7 @@ export function Button({
           colors={gradient}
           start={{ x: 0.3, y: 0 }}
           end={{ x: 1, y: 0.25 }}
-          style={{ borderRadius: 16 }}
+          style={{ borderRadius: 16, flex: 1 }}
         >
           <Pressable
             style={memoizedViewStyle}

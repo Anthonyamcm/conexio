@@ -11,6 +11,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import Toast from 'react-native-toast-message';
 import {
+  Button,
   CoverPhoto,
   Input,
   ProfilePhoto,
@@ -290,6 +291,26 @@ const Profile: React.FC = () => {
       </View>
       {/* Toast Configuration */}
       <Toast />
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 15,
+          justifyContent: 'center',
+          width: '100%',
+          paddingHorizontal: spacing.md,
+        }}
+      >
+        <Button preset={'default'} style={{ flex: 1 }}>
+          {'Skip'}
+        </Button>
+        <Button
+          preset={'gradient'}
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          style={{ flex: 1 }}
+        >
+          {'Continue'}
+        </Button>
+      </View>
     </Screen>
   );
 };

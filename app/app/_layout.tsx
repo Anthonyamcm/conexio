@@ -6,8 +6,7 @@ export default function Layout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Screen
-        preset="auto"
-        safeAreaEdges={['bottom']}
+        preset="fixed"
         contentContainerStyle={{
           flex: 1,
         }}
