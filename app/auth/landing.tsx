@@ -3,13 +3,13 @@ import { colors, spacing } from '@/src/utils';
 import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
-export default function Home() {
+export default function AuthLandingPage() {
   const registerPressed = () => {
-    router.push('/(auth)/(registration)');
+    router.push('/auth/registration');
   };
 
   const loginPressed = () => {
-    router.push('/(auth)/(login)');
+    router.push('/auth/login');
   };
 
   return (

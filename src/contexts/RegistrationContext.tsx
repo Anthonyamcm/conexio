@@ -184,11 +184,11 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
   // Function to navigate to the appropriate screen
   const goToNextScreen = useCallback(() => {
     const stepRoutes: { [key: number]: Href<string | object> } = {
-      0: '/(registration)/username',
-      1: '/(registration)/dob',
-      2: '/(registration)/password',
-      3: '/(registration)/mobile',
-      4: '/(registration)/otp',
+      0: '/auth/registration/username',
+      1: '/auth/registration/dob',
+      2: '/auth/registration/password',
+      3: '/auth/registration/mobile',
+      4: '/auth/registration/otp',
     };
 
     const nextRoute = stepRoutes[state.currentStep];
@@ -196,7 +196,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
       router.push(nextRoute);
     } else {
       // If all steps are completed, navigate to the final screen or home
-      router.push('/');
+      router.replace('/app/ProfileCreation/profile');
     }
   }, [router, state.currentStep]);
 

@@ -217,8 +217,7 @@ const JoinedDateSection: React.FC = React.memo(() => {
   );
 });
 
-/** Main Home Component */
-const Home: React.FC = () => {
+const Profile: React.FC = () => {
   // State variables
   const [coverPhoto, setCoverPhoto] = useState<string | null>(null);
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
@@ -345,4 +344,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default React.memo(Home);
+export default React.memo(Profile);

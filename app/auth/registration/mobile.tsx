@@ -98,7 +98,7 @@ export default function Mobile() {
 
   const emailPressed = useCallback(() => {
     setFormData({ mobile: '' });
-    router.push('/(registration)/email');
+    router.push('/auth/registration/email');
   }, [router]);
 
   const handleContinuePress = useCallback(() => {

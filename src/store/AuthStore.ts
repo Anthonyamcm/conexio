@@ -11,6 +11,7 @@ import {
 interface AuthState {
   authToken: string | null;
   refreshToken: string | null;
+  needsProfileCreation: boolean; // New flag
   isAuthenticated: boolean;
   loading: boolean;
   initializeAuth: () => Promise<void>;
@@ -25,6 +26,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   refreshToken: null,
   isAuthenticated: false,
   loading: true,
+  needsProfileCreation: true,
 
   /**
    * Initialize authentication state by retrieving tokens and user data from Keychain
@@ -96,6 +98,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         refreshToken: null,
         isAuthenticated: false,
         loading: false,
+        needsProfileCreation: false,
       });
     } catch (error) {
       console.error('Logout failed', error);

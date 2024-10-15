@@ -83,7 +83,6 @@ export const useConfrimUser = (
       } catch (error) {
         console.error('Login error:', error);
       }
-
       if (options?.onSuccess) {
         options.onSuccess(data, variables, context);
       }
