@@ -163,8 +163,7 @@ const viewPresets = {
   reversed: [
     baseViewStyle,
     {
-      backgroundColor: colors.transparent,
-      borderColor: colors.palette.neutral300,
+      backgroundColor: colors.palette.neutral200,
     },
   ] as StyleProp<TextStyle>,
   gradient: [baseViewStyle] as StyleProp<TextStyle>,
@@ -173,7 +172,7 @@ const viewPresets = {
 const textPresets: Record<Presets, StyleProp<TextStyle>> = {
   default: [baseTextStyle, { color: colors.palette.neutral600 }],
   filled: [baseTextStyle, { color: colors.palette.neutral300 }],
-  reversed: [baseTextStyle, { color: colors.palette.neutral500 }],
+  reversed: [baseTextStyle, { color: colors.palette.neutral900 }],
   gradient: [baseTextStyle, { color: colors.palette.neutral100 }],
 };
 

@@ -20,6 +20,7 @@ import {
 } from '@/src/components/atoms';
 import { colors, spacing, typography } from '@/src/utils';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { SocialLinks } from '@/src/components/molecules';
 
 /** Constants */
 const MAX_BIO_LENGTH = 150;
@@ -276,6 +277,8 @@ const Profile: React.FC = () => {
 
         {/* Bio Section */}
         <BioSection bio={bio} setBio={setBio} />
+
+        <SocialLinks />
 
         {/* Joined Date Section */}
         <JoinedDateSection />

@@ -6,3 +6,4 @@ export { default as Footer } from './Footer';
 export { default as UsernameCheck } from './UsernameCheck';
 export { default as ProfilePhoto } from './ProfilePhoto';
 export { default as CoverPhoto } from './CoverPhoto';
+export { default as SocialChip } from './SocialChip';
