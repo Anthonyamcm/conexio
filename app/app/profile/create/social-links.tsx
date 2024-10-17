@@ -8,10 +8,17 @@ import {
   FlatList,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import { Button, Input, SocialChip, Text } from '../../atoms';
 import { colors } from '@/src/utils';
 import { SOCIAL_PLATFORMS } from '@/src/constants/SocialPlatforms';
-import { FontAwesome6, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
+import {
+  Button,
+  Input,
+  Screen,
+  SocialChip,
+  Text,
+} from '@/src/components/atoms';
+import { Header } from '@/src/components/molecules';
 
 interface SocialLinksState {
   [platformKey: string]: string; // e.g., { twitter: 'https://twitter.com/username' }
@@ -19,7 +26,7 @@ interface SocialLinksState {
 
 const MAX_LINKS = 5;
 
-const SocialLinks: React.FC = () => {
+const SocialLinksScreen: React.FC = () => {
   // State variables
   const [links, setLinks] = useState<SocialLinksState>({});
   const [isPlatformModalVisible, setPlatformModalVisible] =
@@ -46,10 +53,9 @@ const SocialLinks: React.FC = () => {
 
   // Handler when a platform is selected
   const handlePlatformSelect = useCallback((platformKey: string) => {
-    console.log(`Platform selected: ${platformKey}`);
+    console.log({ platformKey });
     setSelectedPlatform(platformKey);
     setPlatformModalVisible(false);
-    // Removed immediate opening of username modal
   }, []);
 
   // Function to add or update a social link
@@ -69,8 +75,7 @@ const SocialLinks: React.FC = () => {
         ...prevLinks,
         [platform.key]: link,
       }));
-      Keyboard.dismiss();
-      console.log(`Link added: ${platform.name} -> ${link}`);
+      console.log({ links });
     },
     [],
   );
@@ -94,6 +99,7 @@ const SocialLinks: React.FC = () => {
     setUsernameModalVisible(false);
     setUsername('');
     setSelectedPlatform(null);
+    Keyboard.dismiss();
   }, [selectedPlatform, username, addOrUpdateLink]);
 
   // Handler to remove a social link
@@ -101,26 +107,11 @@ const SocialLinks: React.FC = () => {
     const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
     if (!platform) return;
 
-    Alert.alert(
-      'Remove Link',
-      `Are you sure you want to remove your ${platform.name} link?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            setLinks((prevLinks) => {
-              const updatedLinks = { ...prevLinks };
-              delete updatedLinks[platformKey];
-              return updatedLinks;
-            });
-            console.log(`Link removed: ${platform.name}`);
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+    setLinks((prevLinks) => {
+      const updatedLinks = { ...prevLinks };
+      delete updatedLinks[platformKey];
+      return updatedLinks;
+    });
   }, []);
 
   // Render each platform item in the selection modal
@@ -155,38 +146,45 @@ const SocialLinks: React.FC = () => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      {/* Add Social Link Button */}
-      <Button
-        preset="reversed"
-        LeftAccessory={() => (
-          <FontAwesome6
-            name="plus"
-            size={18}
-            color={colors.palette.neutral900}
-            style={{ marginRight: 5 }}
-          />
-        )}
-        onPress={handleAddLink}
-        disabled={Object.keys(links).length >= MAX_LINKS}
-      >
-        <Text preset="bold" size="xs">
-          Add Social Link
-        </Text>
-      </Button>
+    <Screen preset="auto" contentContainerStyle={styles.contentContainer}>
+      <Header
+        title="Add social links"
+        subtitle="Enhance your profile with social links for easy connections."
+      />
+      <View style={styles.container}>
+        {/* Add Social Link Button */}
+        {Object.keys(links).length < MAX_LINKS ? (
+          <Button
+            preset="reversed"
+            LeftAccessory={() => (
+              <FontAwesome6
+                name="plus"
+                size={18}
+                color={colors.palette.neutral900}
+                style={{ marginRight: 5 }}
+              />
+            )}
+            onPress={handleAddLink}
+          >
+            <Text preset="bold" size="xs">
+              Add Social Link
+            </Text>
+          </Button>
+        ) : null}
 
-      {Object.entries(links).map(([platformKey, link]) => {
-        const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
-        if (!platform) return null;
-        return (
-          <SocialChip
-            key={platformKey}
-            label={platform.name}
-            iconName={platform.icon}
-            onDelete={() => handleRemoveLink(platformKey)}
-          />
-        );
-      })}
+        {Object.entries(links).map(([platformKey, link]) => {
+          const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
+          if (!platform) return null;
+          return (
+            <SocialChip
+              key={platformKey}
+              label={platform.name}
+              iconName={platform.icon}
+              onDelete={() => handleRemoveLink(platformKey)}
+            />
+          );
+        })}
+      </View>
 
       {/* Platform Selection Modal */}
       <Modal
@@ -222,7 +220,13 @@ const SocialLinks: React.FC = () => {
         avoidKeyboard={true}
       >
         <View style={styles.modalContent}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 'auto',
+            }}
+          >
             <Text preset="subheading" style={{ flex: 3 }}>
               {'Add Social Link'}
             </Text>
@@ -232,7 +236,8 @@ const SocialLinks: React.FC = () => {
                 colors.palette.primary100,
                 colors.palette.secondary100,
               ]}
-              onPress={() => addOrUpdateLink(selectedPlatform!, username)}
+              onPress={handleUsernameSubmit} // Changed from addOrUpdateLink to handleUsernameSubmit
+              disabled={!username.trim()}
             >
               {'Save'}
             </Button>
@@ -255,30 +260,26 @@ const SocialLinks: React.FC = () => {
             placeholder="Username"
             value={username}
             onChangeText={setUsername}
-            LeftAccessory={() => (
-              <MaterialIcons
-                name="alternate-email"
-                size={26}
-                color={colors.palette.neutral400}
-                style={styles.icon}
-              />
-            )}
-            onSubmitEditing={handleUsernameSubmit}
             returnKeyType="done"
           />
         </View>
       </Modal>
-    </View>
+    </Screen>
   );
 };
 
-export default SocialLinks;
+export default SocialLinksScreen;
 
 // Stylesheet
 const styles = StyleSheet.create({
+  contentContainer: {
+    flexDirection: 'column',
+    gap: 15,
+    flex: 1,
+    padding: 16,
+  },
   container: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
     alignItems: 'flex-start',
     flexWrap: 'wrap',
     gap: 10,
@@ -299,8 +300,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 16,
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
+    borderTopRightRadius: 21,
+    borderTopLeftRadius: 21,
     minHeight: 450,
   },
   platformList: {

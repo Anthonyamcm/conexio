@@ -1,5 +1,5 @@
 import { RegistrationProvider } from '@/src/contexts/RegistrationContext';
-import { Slot, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { RegistrationHeader } from '@/src/components/molecules';
 import { Screen } from '@/src/components/atoms';
 

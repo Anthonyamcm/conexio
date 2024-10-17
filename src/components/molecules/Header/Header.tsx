@@ -8,11 +8,11 @@ interface HeaderProps {
 
 export default function Header({ title, subtitle }: HeaderProps) {
   return (
-    <View style={{ paddingBottom: 10, flexDirection: 'column' }}>
-      <Text preset={'subheading'} weight="medium">
+    <View style={{ paddingBottom: 10, flexDirection: 'column', gap: 10 }}>
+      <Text size="xl" weight="medium">
         {title}
       </Text>
-      <Text>{subtitle}</Text>
+      <Text size="md">{subtitle}</Text>
     </View>
   );
 }

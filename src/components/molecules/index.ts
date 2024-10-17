@@ -3,4 +3,3 @@ export { default as RegistrationHeader } from './RegistrationHeader/Registration
 export { default as DateOfBirthInput } from './DateOfBirthInput/DateOfBirthInput';
 export { default as OneTimePasscode } from './OneTimePasscode/OneTimePasscode';
 export { default as MobileNumberInputField } from './MobileNumberInput/MobileNumberInput';
-export { default as SocialLinks } from './SocialLinks/SocialLinks';

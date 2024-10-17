@@ -51,8 +51,8 @@ export default function RootLayout() {
       if (isAuthenticated) {
         if (needsProfileCreation) {
           // If user needs to create profile and not already on profile creation route
-          if (!pathname.startsWith('/app/ProfileCreation')) {
-            router.replace({ pathname: '/app/ProfileCreation' });
+          if (!pathname.startsWith('/app/profile/create')) {
+            router.replace({ pathname: '/app/profile/create' });
           }
         } else {
           // If authenticated and not needing profile creation, redirect to main tabs

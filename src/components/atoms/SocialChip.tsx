@@ -35,7 +35,7 @@ export default SocailChip;
 const styles = StyleSheet.create({
   chipContainer: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 5,
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 10,

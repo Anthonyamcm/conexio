@@ -1,5 +1,4 @@
 import { Screen } from '@/src/components/atoms';
-
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { Stack, router } from 'expo-router';

@@ -17,7 +17,7 @@ interface ProfilePhotoProps {
 
 const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ uri, onEdit }) => {
   return (
-    <View style={styles.container}>
+    <View>
       <TouchableOpacity onPress={onEdit} accessibilityLabel="Profile Photo">
         {uri ? (
           <Image source={{ uri }} style={styles.profilePhoto} />
@@ -36,16 +36,10 @@ const ProfilePhoto: React.FC<ProfilePhotoProps> = ({ uri, onEdit }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: -55, // To overlap the cover photo
-    marginLeft: 5,
-    marginRight: 'auto',
-  },
   profilePhoto: {
-    width: 125,
-    height: 125,
-    borderRadius: 125 / 2,
-    borderWidth: 4,
+    width: 175,
+    height: 175,
+    borderRadius: 175 / 2,
     borderColor: colors.palette.neutral100,
     resizeMode: 'cover',
   },

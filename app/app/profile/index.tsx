@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 export default function ProfileCreationIndex() {
   const router = useRouter();
   const handleCreateProfile = () => {
-    router.push('/app/ProfileCreation/profile');
+    router.push('/app/profile/create');
   };
 
   const handleSkip = () => {

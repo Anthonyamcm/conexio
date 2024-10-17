@@ -196,7 +196,7 @@ export const RegistrationProvider: React.FC<RegistrationProviderProps> = ({
       router.push(nextRoute);
     } else {
       // If all steps are completed, navigate to the final screen or home
-      router.replace('/app/ProfileCreation');
+      router.replace('/app/profile/create');
     }
   }, [router, state.currentStep]);
 

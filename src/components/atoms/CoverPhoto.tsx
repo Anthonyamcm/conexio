@@ -37,27 +37,20 @@ const CoverPhoto: React.FC<CoverPhotoProps> = ({ uri, onEdit }) => {
 
 const styles = StyleSheet.create({
   container: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     width: '100%',
   },
   coverPhoto: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     height: 175,
-    resizeMode: 'cover',
     width: '100%',
+    resizeMode: 'cover',
   },
   placeholder: {
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderRadius: 16,
     backgroundColor: colors.palette.neutral200,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#fff',
-    fontSize: 18,
   },
 });
 
