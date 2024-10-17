@@ -1,53 +1,109 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   TouchableOpacity,
   StyleSheet,
   Alert,
   Keyboard,
+  FlatList,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import { Button, SocialChip, Text } from '../../atoms';
+import { Button, Input, SocialChip, Text } from '../../atoms';
 import { colors } from '@/src/utils';
 import { SOCIAL_PLATFORMS } from '@/src/constants/SocialPlatforms';
-import { FontAwesome6 } from '@expo/vector-icons';
+import { FontAwesome6, MaterialIcons } from '@expo/vector-icons';
 
 interface SocialLinksState {
-  [platform: string]: string; // e.g., { twitter: 'https://twitter.com/username' }
+  [platformKey: string]: string; // e.g., { twitter: 'https://twitter.com/username' }
 }
 
-const SocialLinks: React.FC = () => {
-  const [links, setLinks] = useState<SocialLinksState>({});
-  const [isModalVisible, setModalVisible] = useState<boolean>(false);
+const MAX_LINKS = 5;
 
-  // Function to add a new link
-  const addOrUpdateLink = (platformKey: string): void => {
-    const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
-    if (!platform) {
-      Alert.alert('Error', 'Selected platform is not supported.');
+const SocialLinks: React.FC = () => {
+  // State variables
+  const [links, setLinks] = useState<SocialLinksState>({});
+  const [isPlatformModalVisible, setPlatformModalVisible] =
+    useState<boolean>(false);
+  const [isUsernameModalVisible, setUsernameModalVisible] =
+    useState<boolean>(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>('');
+
+  // Compute available platforms excluding already added ones
+  const availablePlatforms = useMemo(
+    () =>
+      SOCIAL_PLATFORMS.filter(
+        (platform) => !links.hasOwnProperty(platform.key),
+      ),
+    [links],
+  );
+
+  // Handler to open the platform selection modal
+  const handleAddLink = useCallback(() => {
+    console.log('Opening platform selection modal');
+    setPlatformModalVisible(true);
+  }, []);
+
+  // Handler when a platform is selected
+  const handlePlatformSelect = useCallback((platformKey: string) => {
+    console.log(`Platform selected: ${platformKey}`);
+    setSelectedPlatform(platformKey);
+    setPlatformModalVisible(false);
+    // Removed immediate opening of username modal
+  }, []);
+
+  // Function to add or update a social link
+  const addOrUpdateLink = useCallback(
+    (platformKey: string, username: string) => {
+      const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
+      if (!platform) {
+        Alert.alert('Error', 'Selected platform is not supported.');
+        return;
+      }
+
+      const link = platform.baseUrl
+        ? platform.baseUrl.replace('{username}', encodeURIComponent(username))
+        : username;
+
+      setLinks((prevLinks) => ({
+        ...prevLinks,
+        [platform.key]: link,
+      }));
+      Keyboard.dismiss();
+      console.log(`Link added: ${platform.name} -> ${link}`);
+    },
+    [],
+  );
+
+  // Handler to submit the username and add/update the link
+  const handleUsernameSubmit = useCallback(() => {
+    console.log(
+      `Submitting username: ${username} for platform: ${selectedPlatform}`,
+    );
+    if (!selectedPlatform) {
+      Alert.alert('Error', 'No platform selected.');
       return;
     }
 
-    // Construct the full URL by appending the predefined username
+    if (!username.trim()) {
+      Alert.alert('Validation Error', 'Username cannot be empty.');
+      return;
+    }
 
-    const name = platform.name;
+    addOrUpdateLink(selectedPlatform, username.trim());
+    setUsernameModalVisible(false);
+    setUsername('');
+    setSelectedPlatform(null);
+  }, [selectedPlatform, username, addOrUpdateLink]);
 
-    setLinks((prevLinks) => ({
-      ...prevLinks,
-      [platform.key]: name,
-    }));
-    setModalVisible(false);
-    Keyboard.dismiss(); // Dismiss the keyboard if open
-  };
-
-  // Function to remove a link
-  const removeLink = (platform: string): void => {
-    const platformObj = SOCIAL_PLATFORMS.find((p) => p.key === platform);
-    if (!platformObj) return;
+  // Handler to remove a social link
+  const handleRemoveLink = useCallback((platformKey: string) => {
+    const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
+    if (!platform) return;
 
     Alert.alert(
       'Remove Link',
-      `Are you sure you want to remove your ${platformObj.name} link?`,
+      `Are you sure you want to remove your ${platform.name} link?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -56,43 +112,51 @@ const SocialLinks: React.FC = () => {
           onPress: () => {
             setLinks((prevLinks) => {
               const updatedLinks = { ...prevLinks };
-              delete updatedLinks[platform];
+              delete updatedLinks[platformKey];
               return updatedLinks;
             });
+            console.log(`Link removed: ${platform.name}`);
           },
         },
       ],
       { cancelable: true },
     );
-  };
+  }, []);
 
-  const renderPlatformChoices = () => {
-    return (
-      <View style={styles.platformList}>
-        {SOCIAL_PLATFORMS.map((platform) => (
-          <TouchableOpacity
-            key={platform.key}
-            style={styles.platformItem}
-            onPress={() => addOrUpdateLink(platform.key)}
-          >
-            <FontAwesome6
-              name={platform.icon}
-              size={24}
-              color={colors.palette.neutral900}
-            />
-            <Text
-              preset="bold" // Ensure your 'Text' component supports 'preset'
-            >
-              {platform.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    );
-  };
+  // Render each platform item in the selection modal
+  const renderPlatformItem = useCallback(
+    ({ item }: { item: (typeof SOCIAL_PLATFORMS)[0] }) => (
+      <TouchableOpacity
+        style={styles.platformItem}
+        onPress={() => handlePlatformSelect(item.key)}
+      >
+        <FontAwesome6
+          name={item.icon}
+          size={24}
+          color={colors.palette.neutral900}
+        />
+        <Text preset="bold">{item.name}</Text>
+      </TouchableOpacity>
+    ),
+    [handlePlatformSelect],
+  );
+
+  // Handle modal hide events
+  const handlePlatformModalHide = useCallback(() => {
+    if (selectedPlatform) {
+      console.log('Platform modal hidden, opening username modal');
+      setUsernameModalVisible(true);
+    }
+  }, [selectedPlatform]);
+
+  const handleUsernameModalHide = useCallback(() => {
+    // Any actions when username modal hides
+    console.log('Username modal hidden');
+  }, []);
 
   return (
     <View style={styles.container}>
+      {/* Add Social Link Button */}
       <Button
         preset="reversed"
         LeftAccessory={() => (
@@ -100,43 +164,108 @@ const SocialLinks: React.FC = () => {
             name="plus"
             size={18}
             color={colors.palette.neutral900}
-            style={styles.icon}
+            style={{ marginRight: 5 }}
           />
         )}
-        onPress={() => setModalVisible(true)}
+        onPress={handleAddLink}
+        disabled={Object.keys(links).length >= MAX_LINKS}
       >
         <Text preset="bold" size="xs">
-          {'Add Social Link'}
+          Add Social Link
         </Text>
       </Button>
 
-      {Object.keys(links).length > 0
-        ? Object.keys(links).map((platformKey) => (
-            <SocialChip
-              key={platformKey}
-              label={links[platformKey]}
-              iconName={
-                SOCIAL_PLATFORMS.find((p) => p.key === platformKey)?.icon ||
-                'link'
-              }
-              onDelete={() => removeLink(platformKey)}
-            />
-          ))
-        : null}
+      {Object.entries(links).map(([platformKey, link]) => {
+        const platform = SOCIAL_PLATFORMS.find((p) => p.key === platformKey);
+        if (!platform) return null;
+        return (
+          <SocialChip
+            key={platformKey}
+            label={platform.name}
+            iconName={platform.icon}
+            onDelete={() => handleRemoveLink(platformKey)}
+          />
+        );
+      })}
 
-      {/* Bottom Sheet Modal */}
+      {/* Platform Selection Modal */}
       <Modal
-        isVisible={isModalVisible}
-        onBackdropPress={() => setModalVisible(false)}
+        isVisible={isPlatformModalVisible}
+        onBackdropPress={() => setPlatformModalVisible(false)}
         swipeDirection="down"
-        onSwipeComplete={() => setModalVisible(false)}
+        onSwipeComplete={() => setPlatformModalVisible(false)}
+        onModalHide={handlePlatformModalHide}
         style={styles.modal}
         propagateSwipe={false}
-        avoidKeyboard={true} // Ensure keyboard doesn't overlap the modal
+        avoidKeyboard={true}
       >
         <View style={styles.modalContent}>
-          <Text preset="subheading">Add Social Link</Text>
-          {renderPlatformChoices()}
+          <Text preset="subheading">Select a Platform</Text>
+          <FlatList
+            data={availablePlatforms}
+            keyExtractor={(item) => item.key}
+            renderItem={renderPlatformItem}
+            contentContainerStyle={styles.platformList}
+          />
+        </View>
+      </Modal>
+
+      {/* Username Input Modal */}
+      <Modal
+        isVisible={isUsernameModalVisible}
+        onBackdropPress={() => setUsernameModalVisible(false)}
+        swipeDirection="down"
+        onSwipeComplete={() => setUsernameModalVisible(false)}
+        onModalHide={handleUsernameModalHide}
+        style={styles.modal}
+        propagateSwipe={false}
+        avoidKeyboard={true}
+      >
+        <View style={styles.modalContent}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text preset="subheading" style={{ flex: 3 }}>
+              {'Add Social Link'}
+            </Text>
+            <Button
+              preset="gradient"
+              gradient={[
+                colors.palette.primary100,
+                colors.palette.secondary100,
+              ]}
+              onPress={() => addOrUpdateLink(selectedPlatform!, username)}
+            >
+              {'Save'}
+            </Button>
+          </View>
+
+          <View style={[styles.platformItem, { marginRight: 'auto' }]}>
+            <FontAwesome6
+              name={
+                SOCIAL_PLATFORMS.find((p) => p.key === selectedPlatform)?.icon
+              }
+              size={24}
+              color={colors.palette.neutral900}
+            />
+            <Text preset="bold">
+              {SOCIAL_PLATFORMS.find((p) => p.key === selectedPlatform)?.name}
+            </Text>
+          </View>
+
+          <Input
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            LeftAccessory={() => (
+              <MaterialIcons
+                name="alternate-email"
+                size={26}
+                color={colors.palette.neutral400}
+                style={styles.icon}
+              />
+            )}
+            onSubmitEditing={handleUsernameSubmit}
+            returnKeyType="done"
+          />
         </View>
       </Modal>
     </View>
@@ -150,63 +279,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     paddingHorizontal: 16,
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexWrap: 'wrap',
-    gap: 5,
+    gap: 10,
   },
   chipsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    marginTop: 10,
     gap: 10,
-  },
-  title: {
-    fontSize: 20,
-    marginBottom: 15,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  emptyContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButton: {
-    backgroundColor: '#007BFF',
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginBottom: 20,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  list: {
-    flexGrow: 0,
-  },
-  linkItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginVertical: 5,
-    padding: 10,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 5,
-  },
-  linkText: {
-    flex: 1,
-    marginRight: 10,
-    color: '#333',
-    textDecorationLine: 'underline',
-  },
-  removeText: {
-    color: 'red',
-    fontWeight: 'bold',
-  },
-  emptyText: {
-    textAlign: 'center',
-    color: '#888',
   },
   modal: {
     justifyContent: 'flex-end',
@@ -214,19 +295,13 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flexDirection: 'column',
-    gap: 25,
+    gap: 10,
     backgroundColor: '#fff',
     paddingVertical: 20,
     paddingHorizontal: 16,
     borderTopRightRadius: 16,
     borderTopLeftRadius: 16,
-    minHeight: 500,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
+    minHeight: 450,
   },
   platformList: {
     flexDirection: 'row',
@@ -235,33 +310,15 @@ const styles = StyleSheet.create({
   },
   platformItem: {
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    borderRadius: 16,
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
     backgroundColor: colors.palette.neutral200,
   },
-  platformItemSelected: {
-    backgroundColor: '#6200ee',
-  },
-  platformTextSelected: {
-    color: '#fff',
-  },
-  input: {
-    borderColor: '#888',
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 15,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  icon: {
-    alignSelf: 'center',
-    marginEnd: 6,
-    opacity: 1,
+  icon: { alignSelf: 'center', marginLeft: 6 },
+  submitButton: {
+    marginTop: 10,
   },
 });

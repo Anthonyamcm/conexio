@@ -63,7 +63,6 @@ export default function ProfileCreationIndex() {
         <Button
           preset={'gradient'}
           gradient={[colors.palette.primary100, colors.palette.secondary100]}
-          style={{ flex: 1 }}
           onPress={() => handleCreateProfile()}
         >
           {'Create Profile'}
