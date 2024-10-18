@@ -85,7 +85,7 @@ const ProfilePictureScreen: React.FC = () => {
   }, [handleSubmitStep]);
 
   return (
-    <Screen preset="auto" contentContainerStyle={styles.container}>
+    <Screen preset="fixed" contentContainerStyle={styles.container}>
       <Header
         title="Pick a profile picture"
         subtitle="Have a favorite selfie? Upload it now."

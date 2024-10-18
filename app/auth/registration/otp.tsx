@@ -2,11 +2,11 @@ import React, { useCallback, useRef } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { Button, Footer, Screen } from '@/src/components/atoms';
+import { Button, Screen } from '@/src/components/atoms';
 import { Header, OneTimePasscode } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utils';
-import { OneTimePasscodeHandle } from '@/src/components/molecules/OneTimePasscode/UseOneTimePasscode';
+import { OneTimePasscodeHandle } from '@/src/components/molecules/OneTimePasscodeInput/UseOneTimePasscode';
 import { useConfrimUser } from '@/src/hooks/useConfirmUser';
 
 interface FormValues {

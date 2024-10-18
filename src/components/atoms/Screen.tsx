@@ -10,6 +10,7 @@ import {
   ScrollView,
   ScrollViewProps,
   StyleProp,
+  TouchableWithoutFeedback,
   View,
   ViewStyle,
 } from 'react-native';
@@ -98,9 +99,12 @@ function useAutoPreset(props: AutoScreenProps) {
 function ScreenWithoutScrolling(props: ScreenProps) {
   const { style, contentContainerStyle, children } = props;
   return (
-    <View style={[$outerStyle, style]}>
+    <TouchableWithoutFeedback
+      style={[$outerStyle, style]}
+      onPress={Keyboard.dismiss}
+    >
       <View style={[$innerStyle, contentContainerStyle]}>{children}</View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

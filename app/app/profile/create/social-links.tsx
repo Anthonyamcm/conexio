@@ -19,6 +19,7 @@ import {
   Text,
 } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
+import { useProfileCreation } from '@/src/contexts/ProfileCreationContext';
 
 interface SocialLinksState {
   [platformKey: string]: string; // e.g., { twitter: 'https://twitter.com/username' }
@@ -27,8 +28,10 @@ interface SocialLinksState {
 const MAX_LINKS = 5;
 
 const SocialLinksScreen: React.FC = () => {
-  // State variables
-  const [links, setLinks] = useState<SocialLinksState>({});
+  const { handleSubmitStep, state } = useProfileCreation();
+  const [links, setLinks] = useState<SocialLinksState>(
+    state.formData.socialLinks || {},
+  );
   const [isPlatformModalVisible, setPlatformModalVisible] =
     useState<boolean>(false);
   const [isUsernameModalVisible, setUsernameModalVisible] =
@@ -145,8 +148,22 @@ const SocialLinksScreen: React.FC = () => {
     console.log('Username modal hidden');
   }, []);
 
+  const handleNext = useCallback(() => {
+    handleSubmitStep(
+      { socialLinks: links },
+      false, // Not skipping
+    );
+  }, [handleSubmitStep, links]);
+
+  const handleSkip = useCallback(() => {
+    handleSubmitStep(
+      { socialLinks: {} }, // Clear profile picture if skipped
+      true, // Skipping
+    );
+  }, [handleSubmitStep]);
+
   return (
-    <Screen preset="auto" contentContainerStyle={styles.contentContainer}>
+    <Screen preset="fixed" contentContainerStyle={styles.contentContainer}>
       <Header
         title="Add social links"
         subtitle="Enhance your profile with social links for easy connections."
@@ -184,6 +201,19 @@ const SocialLinksScreen: React.FC = () => {
             />
           );
         })}
+      </View>
+
+      <View style={styles.buttonContainer}>
+        <Button preset={'default'} style={{ flex: 1 }} onPress={handleSkip}>
+          {'Skip'}
+        </Button>
+        <Button
+          preset={'gradient'}
+          gradient={[colors.palette.primary100, colors.palette.secondary100]}
+          onPress={handleNext}
+        >
+          {'Continue'}
+        </Button>
       </View>
 
       {/* Platform Selection Modal */}
@@ -283,6 +313,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     flexWrap: 'wrap',
     gap: 10,
+    flex: 1,
   },
   chipsContainer: {
     flexDirection: 'row',
@@ -321,5 +352,9 @@ const styles = StyleSheet.create({
   icon: { alignSelf: 'center', marginLeft: 6 },
   submitButton: {
     marginTop: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 15,
   },
 });

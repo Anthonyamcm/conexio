@@ -83,7 +83,7 @@ const CoverPhotoScreen: React.FC = () => {
   }, [handleSubmitStep]);
 
   return (
-    <Screen preset="auto" contentContainerStyle={styles.container}>
+    <Screen preset="fixed" contentContainerStyle={styles.container}>
       <Header
         title="Pick a cover photo"
         subtitle="People who visit your profile will see it. Show your style"

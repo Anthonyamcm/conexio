@@ -1,16 +1,11 @@
-import { RegistrationProvider } from '@/src/contexts/RegistrationContext';
-import { Stack, router } from 'expo-router';
-import { RegistrationHeader } from '@/src/components/molecules';
+import { Stack } from 'expo-router';
+import { ProfileCreationHeader } from '@/src/components/molecules';
 import { Screen } from '@/src/components/atoms';
 import { ProfileCreationProvider } from '@/src/contexts/ProfileCreationContext';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Entypo } from '@expo/vector-icons';
+import { StyleSheet } from 'react-native';
 import { spacing } from '@/src/utils';
 
 export default function Layout() {
-  const backPressed = () => {
-    router.back();
-  };
   return (
     <Screen
       preset="fixed"
@@ -20,11 +15,7 @@ export default function Layout() {
       }}
     >
       <ProfileCreationProvider>
-        <View style={styles.stepperContainer}>
-          <TouchableOpacity onPress={backPressed}>
-            <Entypo name="chevron-left" size={32} color="black" />
-          </TouchableOpacity>
-        </View>
+        <ProfileCreationHeader />
         <Stack
           initialRouteName="profile-picture"
           screenOptions={{
