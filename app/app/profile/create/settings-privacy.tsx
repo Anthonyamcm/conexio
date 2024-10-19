@@ -1,5 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Switch, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Alert,
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Button, Screen, Text } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -7,7 +13,7 @@ import { colors } from '@/src/utils';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import SettingRow from '@/src/components/atoms/SettingsRows';
-import { Picker } from '@react-native-picker/picker';
+import PrivacyPickerModal from '@/src/components/molecules/Modals/PrivacyPickerModal';
 
 const SettingsPrivacyScreen: React.FC = () => {
   const [isNotificationsEnabled, setIsNotificationsEnabled] =
@@ -26,6 +32,15 @@ const SettingsPrivacyScreen: React.FC = () => {
   const [contactPreference, setContactPreference] =
     useState<string>('Everyone');
   const [profileVisibility, setProfileVisibility] = useState<string>('Public');
+  const [locationVisibility, setLocationVisibility] =
+    useState<string>('Public');
+
+  // Picker Modal State
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [currentSetting, setCurrentSetting] = useState<
+    'contact' | 'visibility' | null
+  >(null);
+  const [selectedValue, setSelectedValue] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true); // To handle async permission check
 
   useEffect(() => {
@@ -135,17 +150,105 @@ const SettingsPrivacyScreen: React.FC = () => {
   };
 
   /**
-   * Opens the app settings for the user to manually enable permissions.
+   * Handles the press action on privacy settings options to open the Picker modal.
+   * @param setting - The name of the setting being edited.
    */
-  const openAppSettings = () => {
-    Alert.alert(
-      'Permission Blocked',
-      'Notifications permission is blocked. Please enable it from settings.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Settings', onPress: () => console.log('here') },
-      ],
-    );
+  const handlePrivacySettingPress = useCallback(
+    (setting: 'contact' | 'visibility') => {
+      setCurrentSetting(setting);
+      setSelectedValue(
+        setting === 'contact' ? contactPreference : profileVisibility,
+      );
+      setIsModalVisible(true);
+    },
+    [contactPreference, profileVisibility],
+  );
+
+  /**
+   * Handles the selection from the Picker and updates the corresponding state.
+   */
+  const handlePickerValueChange = useCallback((value: string) => {
+    setSelectedValue(value);
+  }, []);
+
+  /**
+   * Confirms the Picker selection and updates the state accordingly.
+   */
+  const confirmPickerSelection = useCallback(() => {
+    if (currentSetting === 'contact') {
+      setContactPreference(selectedValue);
+      // Optionally, persist the change to backend
+    } else if (currentSetting === 'visibility') {
+      setProfileVisibility(selectedValue);
+      // Optionally, persist the change to backend
+    }
+    setIsModalVisible(false);
+    Alert.alert('Settings Updated', 'Your privacy settings have been updated.');
+  }, [currentSetting, selectedValue]);
+
+  /**
+   * Cancels the Picker selection and closes the modal.
+   */
+  const cancelPickerSelection = useCallback(() => {
+    setIsModalVisible(false);
+  }, []);
+
+  const renderPrivacySettings = () => {
+    const settings = [
+      {
+        id: 'visibility',
+        label: 'Profile Visibility',
+        value: profileVisibility,
+        icon: 'eye',
+      },
+      {
+        id: 'contact',
+        label: 'Who Can Contact You',
+        value: contactPreference,
+        icon: 'envelope',
+      },
+      {
+        id: 'search',
+        label: 'Who Can Find You',
+        value: contactPreference,
+        icon: 'search',
+      },
+      {
+        id: 'tag',
+        label: 'Who Can Mention You',
+        value: contactPreference,
+        icon: 'at',
+      },
+
+      // Add more privacy settings here as needed
+    ];
+    return settings.map((setting) => (
+      <View key={setting.id}>
+        <TouchableOpacity
+          style={styles.pickerOption}
+          onPress={() =>
+            handlePrivacySettingPress(setting.id as 'contact' | 'visibility')
+          }
+          activeOpacity={0.7}
+          accessibilityLabel={`Edit ${setting.label}`}
+        >
+          <View style={styles.pickerOptionRow}>
+            <FontAwesome5
+              name={setting.icon as any} // Ensure correct icon type
+              size={20}
+              color={colors.palette.neutral900}
+              style={{ marginRight: 10 }}
+            />
+            <Text preset="bold" style={styles.pickerOptionText}>
+              {setting.label}
+            </Text>
+          </View>
+          <Text preset="bold" style={styles.pickerOptionValue}>
+            {setting.value}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    ));
   };
 
   return (
@@ -223,21 +326,8 @@ const SettingsPrivacyScreen: React.FC = () => {
             </Text>
           </View>
           <View style={styles.divider} />
-          <View style={styles.pickerContainer}>
-            <Text style={styles.pickerLabel}>Who Can Contact You</Text>
-            <View style={styles.pickerWrapper}>
-              <Picker
-                selectedValue={contactPreference}
-                onValueChange={(itemValue) => setContactPreference(itemValue)}
-                style={styles.picker}
-                dropdownIconColor={colors.palette.neutral600}
-              >
-                <Picker.Item label="Everyone" value="Everyone" />
-                <Picker.Item label="Friends Only" value="Friends" />
-                <Picker.Item label="No One" value="No One" />
-              </Picker>
-            </View>
-          </View>
+
+          {renderPrivacySettings()}
         </View>
       </View>
 
@@ -250,6 +340,33 @@ const SettingsPrivacyScreen: React.FC = () => {
         </Button>
       </View>
 
+      {currentSetting && (
+        <PrivacyPickerModal
+          isVisible={isModalVisible}
+          title={
+            currentSetting === 'contact'
+              ? 'Who Can Contact You'
+              : 'Profile Visibility'
+          }
+          options={
+            currentSetting === 'visibility'
+              ? [
+                  { label: 'Public', value: 'Public' },
+                  { label: 'Private', value: 'Private' },
+                ]
+              : [
+                  { label: 'Everyone', value: 'Everyone' },
+                  { label: 'Connections Only', value: 'Connections' },
+                  { label: 'Followers', value: 'Followers' },
+                  { label: 'No One', value: 'No One' },
+                ]
+          }
+          selectedValue={selectedValue}
+          onValueChange={handlePickerValueChange}
+          onConfirm={confirmPickerSelection}
+          onCancel={cancelPickerSelection}
+        />
+      )}
       {/* Add more settings here */}
     </Screen>
   );
@@ -280,23 +397,23 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 5,
   },
-  pickerContainer: {
-    marginBottom: 15,
+  pickerOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
   },
-  pickerLabel: {
+  pickerOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  pickerOptionText: {
     fontSize: 16,
     color: colors.palette.neutral800,
-    marginBottom: 5,
   },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: colors.palette.neutral400,
-    borderRadius: 8,
-    overflow: 'hidden',
-    backgroundColor: colors.palette.neutral100,
-  },
-  picker: {
-    height: 540,
+  pickerOptionValue: {
+    fontSize: 16,
+    color: colors.palette.neutral600,
   },
   settingText: {
     flex: 1,

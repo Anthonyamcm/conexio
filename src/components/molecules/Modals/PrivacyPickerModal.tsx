@@ -1,10 +1,6 @@
 import React from 'react';
-import {
-  Modal,
-  View,
-  StyleSheet,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import { View, StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import Modal from 'react-native-modal';
 import { Picker } from '@react-native-picker/picker';
 import { Button, Text } from '@/src/components/atoms';
 import { colors } from '@/src/utils';
@@ -30,54 +26,49 @@ const PrivacyPickerModal: React.FC<PrivacyPickerModalProps> = ({
 }) => {
   return (
     <Modal
-      visible={isVisible}
-      transparent
-      animationType="slide"
-      onRequestClose={onCancel}
+      isVisible={isVisible}
+      onBackdropPress={() => onCancel}
+      style={styles.modal}
+      propagateSwipe={false}
+      avoidKeyboard={true}
     >
-      <TouchableWithoutFeedback onPress={onCancel}>
-        <View style={styles.modalOverlay} />
-      </TouchableWithoutFeedback>
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{title}</Text>
-          <Picker
-            selectedValue={selectedValue}
-            onValueChange={onValueChange}
-            style={styles.modalPicker}
-            dropdownIconColor={colors.palette.neutral600}
-            accessibilityLabel={`${title} Picker`}
+      <View style={styles.modalContent}>
+        <Text preset="bold" style={styles.modalTitle}>
+          {title}
+        </Text>
+        <Picker
+          selectedValue={selectedValue}
+          onValueChange={onValueChange}
+          style={styles.modalPicker}
+          dropdownIconColor={colors.palette.neutral600}
+          accessibilityLabel={`${title} Picker`}
+        >
+          {options.map((option) => (
+            <Picker.Item
+              key={option.value}
+              label={option.label}
+              value={option.value}
+            />
+          ))}
+        </Picker>
+        <View style={styles.modalButtons}>
+          <Button
+            preset="reversed"
+            onPress={onCancel}
+            style={styles.modalButton}
+            accessibilityLabel="Cancel Picker"
           >
-            {options.map((option) => (
-              <Picker.Item
-                key={option.value}
-                label={option.label}
-                value={option.value}
-              />
-            ))}
-          </Picker>
-          <View style={styles.modalButtons}>
-            <Button
-              preset="filled"
-              onPress={onCancel}
-              style={styles.modalButton}
-              accessibilityLabel="Cancel Picker"
-            >
-              Cancel
-            </Button>
-            <Button
-              preset="gradient"
-              gradient={[
-                colors.palette.primary100,
-                colors.palette.secondary100,
-              ]}
-              onPress={onConfirm}
-              style={styles.modalButton}
-              accessibilityLabel="Confirm Picker Selection"
-            >
-              Confirm
-            </Button>
-          </View>
+            Cancel
+          </Button>
+          <Button
+            preset="gradient"
+            gradient={[colors.palette.primary100, colors.palette.secondary100]}
+            onPress={onConfirm}
+            style={styles.modalButton}
+            accessibilityLabel="Confirm Picker Selection"
+          >
+            Confirm
+          </Button>
         </View>
       </View>
     </Modal>
@@ -87,20 +78,17 @@ const PrivacyPickerModal: React.FC<PrivacyPickerModalProps> = ({
 export default PrivacyPickerModal;
 
 const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-  },
-  modalContainer: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
+  modal: {
+    justifyContent: 'flex-end',
+    margin: 0,
   },
   modalContent: {
-    backgroundColor: colors.palette.neutral100,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    backgroundColor: '#fff',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    borderTopRightRadius: 21,
+    borderTopLeftRadius: 21,
+    minHeight: 400,
   },
   modalTitle: {
     fontSize: 18,
@@ -110,14 +98,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalPicker: {
+    flex: 1,
     width: '100%',
-    height: 150,
-    color: colors.palette.neutral800,
+    color: colors.palette.neutral900,
   },
   modalButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
   },
   modalButton: {
     flex: 1,
