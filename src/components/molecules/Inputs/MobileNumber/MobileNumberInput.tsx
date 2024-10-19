@@ -1,9 +1,9 @@
 import React, { forwardRef, memo, useMemo } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { Input, Text } from '../../atoms';
+import { Input, Text } from '../../../atoms';
 import { colors, spacing } from '@/src/utils';
 import { ICountryCode } from '@/src/config';
-import { InputProps } from '../../atoms/Input';
+import { InputProps } from '../../../atoms/Input/Input';
 
 interface MobileNumberInputFieldProps extends Omit<InputProps, 'error'> {
   countryCode: ICountryCode;

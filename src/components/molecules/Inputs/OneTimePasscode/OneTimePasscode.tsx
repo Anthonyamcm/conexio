@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import { View, TextInput } from 'react-native';
-import { Input, Text } from '../../atoms';
+import { Input, Text } from '../../../atoms';
 import { colors, spacing } from '@/src/utils';
 import useOneTimePasscode, {
   OneTimePasscodeHandle,

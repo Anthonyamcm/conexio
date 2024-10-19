@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';

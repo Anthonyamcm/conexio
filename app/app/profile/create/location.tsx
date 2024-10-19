@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, Alert, ActivityIndicator } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import { View, StyleSheet, Alert } from 'react-native';
 import { useProfileCreation } from '@/src/contexts/ProfileCreationContext';
-import { Button, ProfilePhoto, Screen } from '@/src/components/atoms';
+import { Button, Screen } from '@/src/components/atoms';
 import { Header } from '@/src/components/molecules';
 import { colors } from '@/src/utils';
-import LocationSearch from '@/src/components/molecules/LocationSearchInput/LocationSearchInput';
+import { LocationSearch } from '@/src/components/molecules/Inputs';
 
 const LocationScreen: React.FC = () => {
   const { handleSubmitStep, setFormData, state } = useProfileCreation();

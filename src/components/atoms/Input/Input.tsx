@@ -17,7 +17,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { colors, spacing, typography } from '@/src/utils';
-import { Text, TextProps } from './Text';
+import { Text, TextProps } from '../Text/Text';
 
 export interface InputAccessoryProps {
   style: StyleProp<any>;

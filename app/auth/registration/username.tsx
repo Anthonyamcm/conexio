@@ -14,7 +14,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import _ from 'lodash';
-import UsernamechCheck from '@/src/components/atoms/UsernameCheck';
+import UsernamechCheck from '@/src/components/atoms/Username/UsernameCheck';
 
 interface FormValues {
   username: string;

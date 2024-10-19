@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Keyboard,
 } from 'react-native';
-import { Input, Text } from '../../atoms';
+import { Input, Text } from '../../../atoms';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { colors } from '@/src/utils';
 import useLocationSearch from './useLocationSearch';

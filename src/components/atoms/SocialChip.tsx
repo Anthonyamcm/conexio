@@ -2,7 +2,7 @@ import { colors } from '@/src/utils';
 import { FontAwesome6, FontAwesome } from '@expo/vector-icons';
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { Text } from './Text';
+import { Text } from './Text/Text';
 
 interface SocailChipProps {
   label: string;

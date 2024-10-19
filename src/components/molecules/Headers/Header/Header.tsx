@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Text } from '../../atoms';
+import { Text } from '../../../atoms';
 
 interface HeaderProps {
   title: string;
@@ -12,7 +12,7 @@ export default function Header({ title, subtitle }: HeaderProps) {
       <Text size="xl" weight="medium">
         {title}
       </Text>
-      <Text size="md">{subtitle}</Text>
+      <Text preset="bold">{subtitle}</Text>
     </View>
   );
 }

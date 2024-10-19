@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { AsYouType, parsePhoneNumber } from 'libphonenumber-js';
 import 'yup-phone-lite';
 import { Button, Footer, Screen } from '@/src/components/atoms';
-import { Header, MobileNumberInputField } from '@/src/components/molecules';
+import { Header, MobileNumber } from '@/src/components/molecules';
 import { ICountryCode } from '@/src/config';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing, typography } from '@/src/utils';
@@ -112,7 +112,7 @@ export default function Mobile() {
         subtitle="Enter the mobile number on which you can be contacted. No one will see this on your profile."
       />
       <View style={styles.formContainer}>
-        <MobileNumberInputField
+        <MobileNumber
           ref={mobileRef}
           countryCode={countryCode}
           onCountryCodePress={handleCountryCodePress}

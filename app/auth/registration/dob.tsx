@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo } from 'react';
-import { Button, Footer, Screen } from '@/src/components/atoms';
-import { DateOfBirthInput, Header } from '@/src/components/molecules';
+import { Footer, Screen } from '@/src/components/atoms';
+import { DateOfBirth, Header } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
-import { colors, spacing } from '@/src/utils';
+import { spacing } from '@/src/utils';
 import { useFormik } from 'formik';
 import * as yup from 'yup';
 import { StyleSheet, View } from 'react-native';
@@ -52,7 +52,7 @@ export default function Dob() {
         subtitle="Enter your date of birth (you must be 16+). This won't appear on your profile."
       />
       <View style={styles.formContainer}>
-        <DateOfBirthInput
+        <DateOfBirth
           value={formik.values.dob}
           onChange={(date) => formik.setFieldValue('dob', date)}
           error={formik.errors.dob}

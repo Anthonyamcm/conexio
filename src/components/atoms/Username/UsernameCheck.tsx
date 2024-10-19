@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons, AntDesign } from '@expo/vector-icons';
-import { Text } from './Text';
+import { Text } from '../Text/Text';
 import { colors } from '@/src/utils';
 
 interface UsernameCheckProps {

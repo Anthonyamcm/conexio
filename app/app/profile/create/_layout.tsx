@@ -28,6 +28,7 @@ export default function Layout() {
           <Stack.Screen name="bio" />
           <Stack.Screen name="social-links" />
           <Stack.Screen name="location" />
+          <Stack.Screen name="settings-privacy" />
         </Stack>
       </ProfileCreationProvider>
     </Screen>

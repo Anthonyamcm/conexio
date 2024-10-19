@@ -5,7 +5,7 @@ import React, {
   useCallback,
 } from 'react';
 import { View } from 'react-native';
-import { Input, Text } from '../../atoms';
+import { Input, Text } from '../../../atoms';
 import { colors, spacing } from '@/src/utils';
 import useDateOfBirthInput, {
   DateOfBirthInputReturnType,
@@ -24,7 +24,7 @@ export interface DateOfBirthInputHandle {
   reset: () => void;
 }
 
-const DateOfBirthInput = memo(
+const DateOfBirth = memo(
   forwardRef<DateOfBirthInputHandle, DateOfBirthInputProps>(
     (
       { value, onChange, error, touched, dateFormat = 'DD/MM/YYYY', onBlur },
@@ -122,4 +122,4 @@ const DateOfBirthInput = memo(
   ),
 );
 
-export default DateOfBirthInput;
+export default DateOfBirth;

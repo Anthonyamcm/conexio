@@ -4,7 +4,7 @@ import { TouchableOpacity, View, StyleSheet, Alert } from 'react-native';
 import { spacing } from '@/src/utils';
 import { Entypo } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { Text } from '../../atoms';
+import { Text } from '../../../atoms';
 
 export default function RegistrationHeader() {
   const { prevStep, state, clearFormData, steps } = useRegistration();

@@ -6,7 +6,7 @@ import { Button, Screen } from '@/src/components/atoms';
 import { Header, OneTimePasscode } from '@/src/components/molecules';
 import { useRegistration } from '@/src/contexts/RegistrationContext';
 import { colors, spacing } from '@/src/utils';
-import { OneTimePasscodeHandle } from '@/src/components/molecules/OneTimePasscodeInput/UseOneTimePasscode';
+import { OneTimePasscodeHandle } from '@/src/components/molecules/Inputs/OneTimePasscode/UseOneTimePasscode';
 import { useConfrimUser } from '@/src/hooks/useConfirmUser';
 
 interface FormValues {

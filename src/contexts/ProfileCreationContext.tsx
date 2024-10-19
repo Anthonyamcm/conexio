@@ -124,6 +124,7 @@ export const ProfileCreationProvider: React.FC<
     'Bio',
     'Social Links',
     'Location',
+    'Settings & Privacy',
   ];
 
   // Function to update form data
@@ -159,6 +160,7 @@ export const ProfileCreationProvider: React.FC<
       1: '/app/profile/create/bio',
       2: '/app/profile/create/social-links',
       3: '/app/profile/create/location',
+      4: '/app/profile/create/settings-privacy',
     };
 
     const nextRoute = stepRoutes[state.currentStep];
